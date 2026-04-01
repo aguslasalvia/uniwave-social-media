@@ -1,83 +1,135 @@
-<!-- Footer -->
 <footer>
-	<div class="footer-content">
-		<div class="footer-brand">
-			<img src="/logo.png" alt="UniWave Logo" />
-			<span>UniWave</span>
-		</div>
-		<div class="footer-links">
-			<a href="#features">Funcionalidades</a>
-			<a href="#download">Descargar</a>
-			<a href="#">Acerca de</a>
+	<div class="footer-container">
+		<div class="footer-main">
+			<div class="footer-brand">
+				<img src="/logo.png" alt="UniWave Logo" />
+				<div class="brand-text">
+					<span class="brand-name">UniWave</span>
+					<span class="brand-tagline">La comunidad universitaria</span>
+				</div>
+			</div>
+			<div class="footer-links">
+				<a href="#features">Funcionalidades</a>
+				<a href="#download">Descargar</a>
+				<a href="#contact">Contacto</a>
+				<a href="https://bandicoot.solutions" target="_blank" rel="noopener">Bandicoot</a>
+			</div>
 		</div>
 		<div class="footer-bottom">
-			<p>&copy; 2025 Bandicoot Solutions</p>
+			<p>&copy; 2025 Bandicoot Solutions. Todos los derechos reservados.</p>
 		</div>
 	</div>
 </footer>
 
 <style>
-	/* Footer */
 	footer {
-		background: var(--bg-color);
-		border-top: 1px solid var(--border-color);
-		padding: 2.5rem 2rem 2rem;
-		text-align: center;
+		background: linear-gradient(180deg, var(--bg-color) 0%, rgba(129, 140, 248, 0.05) 100%);
+		border-top: 1px solid rgba(129, 140, 248, 0.1);
+		padding: 4rem 2rem 2rem;
 	}
 
-	.footer-content {
-		max-width: 500px;
+	.footer-container {
+		max-width: 1200px;
 		margin: 0 auto;
+	}
+
+	.footer-main {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 3rem;
+		flex-wrap: wrap;
+		gap: 2rem;
 	}
 
 	.footer-brand {
 		display: flex;
 		align-items: center;
-		justify-content: center;
 		gap: 1rem;
-		margin-bottom: 2rem;
 	}
 
 	.footer-brand img {
-		width: 40px;
-		height: 40px;
+		width: 48px;
+		height: 48px;
+		border-radius: 12px;
 	}
 
-	.footer-brand span {
+	.brand-text {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.brand-name {
 		font-size: 1.4rem;
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--text-color);
+		letter-spacing: -0.5px;
+	}
+
+	.brand-tagline {
+		font-size: 0.85rem;
+		color: rgba(249, 250, 251, 0.6);
 	}
 
 	.footer-links {
 		display: flex;
-		justify-content: center;
 		gap: 2rem;
-		margin-bottom: 2rem;
 		flex-wrap: wrap;
 	}
 
 	.footer-links a {
-		color: var(--accent-color);
+		color: rgba(249, 250, 251, 0.7);
 		text-decoration: none;
-		font-size: 0.9rem;
-		transition: color 0.3s ease;
+		font-size: 0.95rem;
 		font-weight: 500;
+		transition: all 0.2s ease;
+		position: relative;
+	}
+
+	.footer-links a::after {
+		content: '';
+		position: absolute;
+		bottom: -4px;
+		left: 0;
+		width: 0;
+		height: 2px;
+		background: var(--primary-color);
+		transition: width 0.3s ease;
 	}
 
 	.footer-links a:hover {
-		color: var(--primary-color);
+		color: var(--text-color);
+	}
+
+	.footer-links a:hover::after {
+		width: 100%;
 	}
 
 	.footer-bottom {
-		border-top: 1px solid var(--border-color);
-		padding-top: 1.5rem;
+		border-top: 1px solid rgba(129, 140, 248, 0.1);
+		padding-top: 2rem;
+		text-align: center;
 	}
 
 	.footer-bottom p {
-		color: var(--accent-color);
+		color: rgba(249, 250, 251, 0.5);
 		font-size: 0.85rem;
 		margin: 0;
-		opacity: 0.7;
+	}
+
+	@media (max-width: 768px) {
+		.footer-main {
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.footer-links {
+			justify-content: center;
+			gap: 1.5rem;
+		}
+
+		.footer-brand {
+			justify-content: center;
+		}
 	}
 </style>

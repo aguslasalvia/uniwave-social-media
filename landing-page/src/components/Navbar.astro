@@ -10,39 +10,85 @@ const links = [
 
 <header>
 	<nav>
-		<a href="#hero" class="logo">
-			<img src="/logo.png" alt="App Logo" />
+		<a href="/#" class="logo">
+			<img src="/logo.png" alt="UniWave" />
 			<span>UniWave</span>
 		</a>
 
 		<ul class="nav-links">
-			{
-				links.map((link) => (
-					<li>
-						<a class="nav-link" href={link.href}>
-							{link.label}
-						</a>
-					</li>
-				))
-			}
+			{links.map(link => (
+				<li>
+					<a class="nav-link" href={link.href}>{link.label}</a>
+				</li>
+			))}
 		</ul>
 
-		<a class="btn-download" href="#download">
-			Descargar
-		</a>
+		<div class="nav-right">
+			<a class="btn-download" href="/#download">Descargar</a>
+			<button class="hamburger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+				<svg class="icon-menu" width="22" height="22" viewBox="0 0 22 22" fill="none">
+					<line x1="2" y1="6" x2="20" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<line x1="2" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<line x1="2" y1="16" x2="20" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+				</svg>
+				<svg class="icon-close" width="22" height="22" viewBox="0 0 22 22" fill="none">
+					<line x1="4" y1="4" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					<line x1="18" y1="4" x2="4" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+				</svg>
+			</button>
+		</div>
 	</nav>
+
+	<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+		<ul>
+			{links.map(link => (
+				<li>
+					<a class="mobile-link" href={link.href}>{link.label}</a>
+				</li>
+			))}
+		</ul>
+		<a class="mobile-cta" href="/#download">Descargar App</a>
+	</div>
 </header>
+
+<script>
+	const hamburger = document.querySelector<HTMLButtonElement>('.hamburger');
+	const mobileMenu = document.querySelector<HTMLElement>('.mobile-menu');
+
+	function closeMenu() {
+		hamburger?.setAttribute('aria-expanded', 'false');
+		hamburger?.classList.remove('open');
+		mobileMenu?.classList.remove('open');
+		mobileMenu?.setAttribute('aria-hidden', 'true');
+	}
+
+	hamburger?.addEventListener('click', () => {
+		const isOpen = hamburger.getAttribute('aria-expanded') === 'true';
+		if (isOpen) {
+			closeMenu();
+		} else {
+			hamburger.setAttribute('aria-expanded', 'true');
+			hamburger.classList.add('open');
+			mobileMenu?.classList.add('open');
+			mobileMenu?.setAttribute('aria-hidden', 'false');
+		}
+	});
+
+	document.querySelectorAll('.mobile-link, .mobile-cta').forEach(link => {
+		link.addEventListener('click', closeMenu);
+	});
+</script>
 
 <style>
 	header {
 		width: 100%;
-		background: rgba(17, 24, 39, 0.85);
-		backdrop-filter: blur(12px);
-		padding: 0.75rem 2rem;
 		position: fixed;
 		top: 0;
 		z-index: 1000;
-		border-bottom: 1px solid rgba(129, 140, 248, 0.15);
+		background: rgba(8, 12, 24, 0.82);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+		border-bottom: 1px solid var(--border-color);
 	}
 
 	nav {
@@ -51,6 +97,7 @@ const links = [
 		justify-content: space-between;
 		max-width: 1200px;
 		margin: 0 auto;
+		padding: 0.875rem 2rem;
 		gap: 2rem;
 	}
 
@@ -59,16 +106,17 @@ const links = [
 		align-items: center;
 		gap: 0.75rem;
 		text-decoration: none;
+		flex-shrink: 0;
 	}
 
 	.logo img {
-		width: 40px;
-		height: 40px;
-		border-radius: 10px;
+		width: 34px;
+		height: 34px;
+		border-radius: 9px;
 	}
 
 	.logo span {
-		font-size: 1.4rem;
+		font-size: 1.25rem;
 		font-weight: 700;
 		color: var(--text-color);
 		letter-spacing: -0.5px;
@@ -76,57 +124,140 @@ const links = [
 
 	.nav-links {
 		display: flex;
-		gap: 2rem;
+		gap: 0.125rem;
 		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
 
 	.nav-link {
-		color: rgba(249, 250, 251, 0.75);
+		color: var(--text-muted);
 		text-decoration: none;
-		font-size: 0.95rem;
+		font-size: 0.9rem;
 		font-weight: 500;
-		transition: all 0.2s ease;
-		position: relative;
-		padding: 0.5rem 0;
-	}
-
-	.nav-link::after {
-		content: '';
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		width: 0;
-		height: 2px;
-		background: var(--primary-color);
-		transition: width 0.3s ease;
+		padding: 0.5rem 0.875rem;
+		border-radius: 8px;
+		transition: color 0.2s ease, background 0.2s ease;
+		display: block;
 	}
 
 	.nav-link:hover {
 		color: var(--text-color);
+		background: rgba(255, 255, 255, 0.06);
 	}
 
-	.nav-link:hover::after {
-		width: 100%;
+	.nav-right {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+		flex-shrink: 0;
 	}
 
 	.btn-download {
-		background: linear-gradient(135deg, #818cf8, #6366f1);
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
 		color: white;
-		padding: 0.65rem 1.5rem;
+		padding: 0.575rem 1.25rem;
 		border-radius: 50px;
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: 0.875rem;
 		text-decoration: none;
-		transition: all 0.3s ease;
-		box-shadow: 0 4px 15px rgba(129, 140, 248, 0.3);
+		transition: all 0.25s ease;
+		box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+		white-space: nowrap;
 	}
 
 	.btn-download:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(129, 140, 248, 0.4);
-		background: linear-gradient(135deg, #a5b4fc, #818cf8);
+		box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
+	}
+
+	.hamburger {
+		display: none;
+		background: none;
+		border: 1px solid var(--border-color);
+		border-radius: 9px;
+		padding: 0.45rem;
+		cursor: pointer;
+		color: var(--text-color);
+		transition: background 0.2s ease, border-color 0.2s ease;
+		align-items: center;
+		justify-content: center;
+		line-height: 0;
+	}
+
+	.hamburger:hover {
+		background: rgba(255, 255, 255, 0.07);
+		border-color: var(--border-hover);
+	}
+
+	.icon-close {
+		display: none;
+	}
+
+	.hamburger.open .icon-menu {
+		display: none;
+	}
+
+	.hamburger.open .icon-close {
+		display: block;
+	}
+
+	/* Mobile menu */
+	.mobile-menu {
+		display: none;
+		overflow: hidden;
+		max-height: 0;
+		transition: max-height 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+		background: rgba(8, 12, 24, 0.98);
+		border-top: 1px solid var(--border-color);
+	}
+
+	.mobile-menu.open {
+		max-height: 420px;
+	}
+
+	.mobile-menu ul {
+		list-style: none;
+		margin: 0;
+		padding: 0.75rem 1rem 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.mobile-link {
+		display: block;
+		padding: 0.8rem 1rem;
+		color: var(--text-muted);
+		text-decoration: none;
+		font-size: 1rem;
+		font-weight: 500;
+		border-radius: 10px;
+		transition: color 0.2s ease, background 0.2s ease;
+	}
+
+	.mobile-link:hover {
+		color: var(--text-color);
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	.mobile-cta {
+		display: block;
+		margin: 0.75rem 1rem 1rem;
+		padding: 0.875rem;
+		text-align: center;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+		color: white;
+		text-decoration: none;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 0.95rem;
+		transition: opacity 0.2s ease;
+		box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+	}
+
+	.mobile-cta:hover {
+		opacity: 0.88;
 	}
 
 	@media (max-width: 900px) {
@@ -134,8 +265,22 @@ const links = [
 			display: none;
 		}
 
+		.hamburger {
+			display: flex;
+		}
+
+		.mobile-menu {
+			display: block;
+		}
+
 		.btn-download {
-			margin-left: auto;
+			display: none;
+		}
+	}
+
+	@media (max-width: 600px) {
+		nav {
+			padding: 0.875rem 1.25rem;
 		}
 	}
 </style>

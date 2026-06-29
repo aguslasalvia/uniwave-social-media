@@ -303,12 +303,25 @@ export default function ProfileScreen() {
                 {/* Profile Header */}
                 <View style={styles.profileHeader}>
                   <View style={styles.profileImageContainer}>
-                    <Image
-                      source={{
-                        uri: "http://192.168.68.220:9000/uniwave/BLL7bjX64HltuqLgTe3u/profile.jpeg",
-                      }}
-                      style={{ width: 100, height: 100, borderRadius: 50 }}
-                    />
+                    {userProfile?.avatar ? (
+                      <Image
+                        source={{ uri: userProfile.avatar }}
+                        style={{ width: 100, height: 100, borderRadius: 50 }}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.profileImage,
+                          { backgroundColor: colors.tint },
+                        ]}
+                      >
+                        <Text style={[styles.profileAvatar, { color: "#ffffff" }]}>
+                          {(userProfile?.fullName || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
                   <View style={styles.profileInfo}>
@@ -338,7 +351,7 @@ export default function ProfileScreen() {
                 >
                   <View style={styles.statItem}>
                     <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {staticData.stats.posts}
+                      {userStats.posts}
                     </Text>
                     <Text style={[styles.statLabel, { color: colors.icon }]}>
                       Publicaciones
@@ -346,7 +359,7 @@ export default function ProfileScreen() {
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {staticData.stats.followers}
+                      {userStats.followers}
                     </Text>
                     <Text style={[styles.statLabel, { color: colors.icon }]}>
                       Seguidores
@@ -354,7 +367,7 @@ export default function ProfileScreen() {
                   </View>
                   <View style={styles.statItem}>
                     <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {staticData.stats.following}
+                      {userStats.following}
                     </Text>
                     <Text style={[styles.statLabel, { color: colors.icon }]}>
                       Siguiendo

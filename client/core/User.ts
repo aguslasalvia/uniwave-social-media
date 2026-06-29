@@ -10,6 +10,7 @@ export interface User {
   dateOfBirth: string;
   university: string;
   career: string;
+  avatar?: string;
 }
 
 // Register
@@ -59,6 +60,7 @@ export interface UserProfile {
   dateOfBirth: string;
   university: string;
   career: string;
+  avatar?: string;
 }
 
 export interface UserPostInfo {

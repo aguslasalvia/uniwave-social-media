@@ -1,16 +1,8 @@
+// Matches the JSON returned by the backend (core.Settings).
 export interface Settings {
-  Language: string;
-  Background: string;
-  PrimaryColor: string;
-  SecondaryColor: string;
-  NotificationsEnabled: boolean;
-}
-
-export interface UpdateSetting {
-  userID: string;
-  Language: string;
-  Background: string;
-  PrimaryColor: string;
-  SecondaryColor: string;
-  NotificationsEnabled: boolean;
+  language: string;
+  background: string;
+  primaryColor: string;
+  secondaryColor: string;
+  notificationsEnabled: boolean;
 }

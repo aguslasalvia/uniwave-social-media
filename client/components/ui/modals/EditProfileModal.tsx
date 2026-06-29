@@ -100,8 +100,11 @@ export function EditProfileModal({
       payload.username = form.username;
     if (form.email !== initialData.email) payload.email = form.email;
     if (form.phone !== initialData.phone) payload.phone = form.phone;
-    if (form.dateOfBirth !== initialData.dateOfBirth)
-      payload.dateOfBirth = form.dateOfBirth;
+    if (form.dateOfBirth !== initialData.dateOfBirth) {
+      // The server expects an RFC3339 timestamp, not a bare YYYY-MM-DD date.
+      const [year, month, day] = form.dateOfBirth.split("-").map(Number);
+      payload.dateOfBirth = new Date(year, month - 1, day).toISOString();
+    }
     if (form.university !== initialData.university)
       payload.university = form.university;
     if (form.career !== initialData.career) payload.career = form.career;

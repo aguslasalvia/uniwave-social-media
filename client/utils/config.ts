@@ -1,11 +1,15 @@
 import Constants from "expo-constants";
 
-// Acceder a las variables de entorno desde app.json
+const extra = Constants.expoConfig?.extra ?? {};
+
+const DEFAULT_API_URL = "http://localhost:8080";
+
+// Acceder a las variables de entorno definidas en app.json (campo "extra").
 export const config = {
-  apiUrl: Constants.expoConfig?.extra?.environment || "https://localhost:8080",
-  environment: Constants.expoConfig?.extra?.environment || "development",
+  apiUrl: extra.apiUrl || DEFAULT_API_URL,
+  environment: extra.environment || "development",
 };
 
-// También puedes acceder directamente
-export const getApiUrl = () => Constants.expoConfig?.extra?.apiUrl;
-export const getEnvironment = () => Constants.expoConfig?.extra?.environment;
+// Accesos directos
+export const getApiUrl = (): string => extra.apiUrl || DEFAULT_API_URL;
+export const getEnvironment = (): string => extra.environment || "development";

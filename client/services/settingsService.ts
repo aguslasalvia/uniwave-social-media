@@ -4,7 +4,7 @@ import api from "@/utils/api";
 
 export const settingsService = {
   async getSettings(): Promise<Settings | null> {
-    const response = await api.get("/settings");
+    const response = await api.get("/settings/");
     if (response.status !== 200 || !response.data) {
       throw new Error("No settings found");
     }
@@ -13,7 +13,7 @@ export const settingsService = {
   },
 
   async updateSettings(settings: Settings): Promise<boolean> {
-    const response = await api.patch("/settings", settings);
+    const response = await api.patch("/settings/update", settings);
     if (response.status !== 200) {
       throw new Error("Failed to update settings");
     }

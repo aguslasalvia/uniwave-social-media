@@ -1,12 +1,22 @@
-import { UserPostInfo } from "./User";
+export interface PostAuthor {
+  id: string;
+  username: string;
+  fullName: string;
+  university: string;
+  avatar: string;
+}
 
 export interface Post {
   id: string;
-  user: UserPostInfo;
+  user: PostAuthor;
   content: string;
-  imageUrl?: [];
-  likes: [];
-  comments: [];
+  imageUrl: string[];
+  createdAt: number;
+  privacy: string;
+  likes: string[];
+  likesCount: number;
+  likedByMe: boolean;
+  comments: number;
 }
 
 export interface CreatePostForm {

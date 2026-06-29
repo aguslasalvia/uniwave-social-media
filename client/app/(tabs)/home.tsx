@@ -16,11 +16,6 @@ import { Post } from "@/core/Post";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { postService } from "@/services/postService";
 
-// Mock data for stories
-
-// Mock data for posts - Diverse university careers
-const posts = [{}];
-
 export default function HomeScreen() {
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [postsData, setPostsData] = useState<Post[]>([]);
@@ -36,20 +31,38 @@ export default function HomeScreen() {
     fetchPostsData();
   }, [refresh]);
 
-  const handleStoryPress = (story: any) => {
-    console.log("Story pressed:", story.name);
-  };
-
   const handlePostPress = (post: any) => {
     console.log("Post pressed:", post.id);
   };
 
-  const handleLike = (postId: string) => {
-    console.log("Like pressed for post:", postId);
-  };
+  const handleLike = async (post: Post) => {
+    const liked = post.likedByMe;
 
-  const handleComment = (postId: string) => {
-    console.log("Comment pressed for post:", postId);
+    // Optimistic update
+    setPostsData((prev) =>
+      prev.map((p) =>
+        p.id === post.id
+          ? {
+              ...p,
+              likedByMe: !liked,
+              likes: liked
+                ? p.likes.slice(0, Math.max(0, p.likes.length - 1))
+                : [...p.likes, "__me__"],
+            }
+          : p,
+      ),
+    );
+
+    try {
+      if (liked) {
+        await postService.unlikePost(post.id);
+      } else {
+        await postService.likePost(post.id);
+      }
+    } catch {
+      // Revert on failure
+      setPostsData((prev) => prev.map((p) => (p.id === post.id ? post : p)));
+    }
   };
 
   const handleShare = (postId: string) => {
@@ -60,10 +73,14 @@ export default function HomeScreen() {
     setShowCreateModal(true);
   };
 
-  const handleCreatePostSubmit = async (postData: any) => {
-    const response = await postService.createPost(postData);
-    // Aquí se agregaría el nuevo post a la lista
-    // Por ahora solo mostramos en consola
+  const handleCreatePostSubmit = async (postData: FormData) => {
+    try {
+      await postService.createPost(postData);
+      // Refresh the feed so the new post appears
+      setRefresh((r) => !r);
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
   };
 
   return (
@@ -141,10 +158,10 @@ export default function HomeScreen() {
                     content={item.content}
                     likes={item.likes}
                     comments={item.comments}
+                    likedByMe={item.likedByMe}
                     image={item.imageUrl}
                     onPress={() => handlePostPress(item)}
-                    onLike={() => handleLike(item.id)}
-                    // onComment={() => handleComment(item.id)}
+                    onLike={() => handleLike(item)}
                     onShare={() => handleShare(item.id)}
                   />
                 )}

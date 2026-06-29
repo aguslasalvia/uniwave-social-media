@@ -4,16 +4,16 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
 import { Colors } from "@/constants/Colors";
-import { UserPostInfo } from "@/core/User";
+import { PostAuthor } from "@/core/Post";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface PostCardProps {
-  user: UserPostInfo;
+  user?: PostAuthor;
   content: string;
-  likes: [];
-  comments: [];
-
-  image?: [];
+  likes?: string[];
+  comments?: number;
+  likedByMe?: boolean;
+  image?: string[];
   onPress?: () => void;
   onLike?: () => void;
   onComment?: () => void;
@@ -21,9 +21,11 @@ interface PostCardProps {
 }
 
 export function PostCard({
+  user,
   content,
   likes,
   comments,
+  likedByMe = false,
   image,
   onPress,
   onLike,
@@ -32,6 +34,11 @@ export function PostCard({
 }: PostCardProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+
+  const likesCount = likes?.length ?? 0;
+  const commentsCount = comments ?? 0;
+  const displayName = user?.fullName || user?.username || "Usuario";
+  const firstImage = image && image.length > 0 ? image[0] : null;
 
   return (
     <TouchableOpacity
@@ -47,6 +54,32 @@ export function PostCard({
     >
       {/* Header */}
       <View style={styles.header}>
+        <View style={styles.userInfo}>
+          <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
+            {user?.avatar ? (
+              <Image
+                source={{ uri: user.avatar }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <ThemedText style={styles.avatarText}>
+                {displayName.charAt(0).toUpperCase()}
+              </ThemedText>
+            )}
+          </View>
+          <View style={styles.userDetails}>
+            <ThemedText style={[styles.userName, { color: colors.text }]}>
+              {displayName}
+            </ThemedText>
+            {!!user?.university && (
+              <View style={styles.universityBadge}>
+                <ThemedText style={styles.universityText}>
+                  {user.university}
+                </ThemedText>
+              </View>
+            )}
+          </View>
+        </View>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.moreButton}>
             <Ionicons
@@ -65,10 +98,10 @@ export function PostCard({
         </ThemedText>
 
         {/* Image */}
-        {image && (
+        {firstImage && (
           <View style={styles.imageContainer}>
             <Image
-              source={{ uri: "" }}
+              source={{ uri: firstImage }}
               style={styles.postImage}
               resizeMode="cover"
             />
@@ -78,16 +111,20 @@ export function PostCard({
         {/* Action buttons */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.actionButton} onPress={onLike}>
-            <Ionicons name="heart-outline" size={18} color={colors.icon} />
+            <Ionicons
+              name={likedByMe ? "heart" : "heart-outline"}
+              size={18}
+              color={likedByMe ? "#ef4444" : colors.icon}
+            />
             <ThemedText style={[styles.actionText, { color: colors.icon }]}>
-              {likes == null ? 0 : likes.length}
+              {likesCount}
             </ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={onComment}>
             <Ionicons name="chatbubble-outline" size={18} color={colors.icon} />
             <ThemedText style={[styles.actionText, { color: colors.icon }]}>
-              {comments == null ? 0 : comments.length}
+              {commentsCount}
             </ThemedText>
           </TouchableOpacity>
 
@@ -135,6 +172,13 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 18,
+    color: "#ffffff",
+    fontWeight: "700",
+  },
+  avatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   userDetails: {
     flex: 1,

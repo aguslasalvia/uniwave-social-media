@@ -10,7 +10,10 @@ import (
 func UserRouter(router *gin.Engine) {
 	userController := controllers.NewUserController()
 	user := router.Group("/user")
-
-	user.PATCH("/update", middlewares.TokenMiddleware(), userController.Update)
-
+	user.Use(middlewares.TokenMiddleware())
+	{
+		user.PATCH("/update", userController.Update)
+		user.GET("/stats", userController.Stats)
+		user.POST("/avatar", userController.UploadAvatar)
+	}
 }

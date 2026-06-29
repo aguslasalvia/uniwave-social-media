@@ -11,8 +11,8 @@ func SetupRoutes() *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"POST", "GET", "PATCH", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
+		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
 	}))
 
 	AuthRouter(r)
@@ -20,6 +20,7 @@ func SetupRoutes() *gin.Engine {
 	SettingsRouter(r)
 	UnversitiesRouter(r)
 	PostRouter(r)
+	CommentRouter(r)
 
 	return r
 }

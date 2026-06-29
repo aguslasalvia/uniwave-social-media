@@ -16,6 +16,7 @@ type UserResponseDTO struct {
 	DateOfBirth time.Time `json:"dateOfBirth"`
 	University  string    `json:"university"`
 	Career      string    `json:"career"`
+	Avatar      string    `json:"avatar"`
 }
 
 type UserCreateDTO struct {

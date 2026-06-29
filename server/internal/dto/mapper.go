@@ -1,4 +1,4 @@
-// This file contains all ToDTO functions
+// Contains the conversion functions between domain models (core) and DTOs.
 package dto
 
 import (
@@ -6,11 +6,14 @@ import (
 	"uniwave/internal/utils"
 )
 
-// *****************************************
-// User DTO and ToModel
-// *****************************************
-
+// ToUserDTO builds the public representation of a user. The university is
+// exposed as its name (taken from the preloaded relation, if present).
 func ToUserDTO(user core.User) UserResponseDTO {
+	universityName := ""
+	if user.University != nil {
+		universityName = user.University.Name
+	}
+
 	return UserResponseDTO{
 		ID:          user.ID,
 		FullName:    user.FullName,
@@ -18,24 +21,24 @@ func ToUserDTO(user core.User) UserResponseDTO {
 		Email:       user.Email,
 		Phone:       user.Phone,
 		DateOfBirth: user.DateOfBirth,
-		University:  user.University,
+		University:  universityName,
 		Career:      user.Career,
+		Avatar:      user.Avatar,
 	}
 }
 
+// ToUserModel builds a user from the registration data.
 func ToUserModel(createDTO UserCreateDTO) core.User {
-	return core.User{
-		FullName:    createDTO.FullName,
-		Username:    createDTO.Username,
-		Email:       createDTO.Email,
-		Phone:       createDTO.Phone,
-		DateOfBirth: createDTO.DateOfBirth,
-		University:  createDTO.University,
-		Career:      createDTO.Career,
+	hashed, _ := utils.HashPassword(createDTO.Password)
 
-		Password: func() string {
-			hashed, _ := utils.HashPassword(createDTO.Password)
-			return hashed
-		}(), // Hash the password before storing
+	return core.User{
+		FullName:     createDTO.FullName,
+		Username:     createDTO.Username,
+		Email:        createDTO.Email,
+		Phone:        createDTO.Phone,
+		DateOfBirth:  createDTO.DateOfBirth,
+		UniversityID: createDTO.University,
+		Career:       createDTO.Career,
+		Password:     hashed,
 	}
 }

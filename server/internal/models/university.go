@@ -2,101 +2,61 @@ package models
 
 import (
 	"context"
+	"errors"
+
 	"uniwave/internal/config"
+	"uniwave/internal/core"
 	"uniwave/internal/dto"
 
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
+// GetAllUniversities lists the enabled universities (state = true).
 func GetAllUniversities(ctx context.Context) ([]dto.UniveristyListDTO, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
+	var universities []dto.UniveristyListDTO
+	err := config.DB.WithContext(ctx).
+		Model(&core.University{}).
+		Where("state = ?", true).
+		Find(&universities).Error
 	if err != nil {
 		return nil, err
 	}
-	defer client.Close()
-
-	iter := client.Collection("universities").
-		Where("state", "==", true).
-		Documents(ctx)
-
-	defer iter.Stop()
-
-	var universities []dto.UniveristyListDTO
-
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		var uni dto.UniveristyListDTO
-		// Mapear campos desde Firestore al DTO
-		if name, ok := doc.Data()["name"].(string); ok {
-			uni.Name = name
-		}
-		uni.ID = doc.Ref.ID // El ID del documento
-
-		universities = append(universities, uni)
-	}
-
 	return universities, nil
 }
 
-func GetUniversityTheme(ctx context.Context, id string) (dto.ThemeDTO, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
+// GetUniversityTheme returns a university's visual theme.
+func GetUniversityTheme(ctx context.Context, id string) (core.Theme, error) {
+	var university core.University
+	err := config.DB.WithContext(ctx).First(&university, "id = ?", id).Error
 	if err != nil {
-		return dto.ThemeDTO{}, err
-	}
-	defer client.Close()
-
-	doc, err := client.Collection("universities").Doc(id).Get(ctx)
-
-	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			return dto.ThemeDTO{}, nil
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return core.Theme{}, nil
 		}
-		return dto.ThemeDTO{}, err
+		return core.Theme{}, err
 	}
-
-	var result struct {
-		Theme dto.ThemeDTO `firestore:"theme"`
-	}
-
-	if err := doc.DataTo(&result); err != nil {
-		return dto.ThemeDTO{}, err
-	}
-
-	return result.Theme, nil
+	return university.Theme, nil
 }
 
+// GetUniversityNameByID returns a university's name by its ID.
 func GetUniversityNameByID(ctx context.Context, id string) (string, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
+	var university core.University
+	err := config.DB.WithContext(ctx).
+		Select("name").
+		First(&university, "id = ?", id).Error
 	if err != nil {
 		return "", err
 	}
-	defer client.Close()
+	return university.Name, nil
+}
 
-	docRef := client.Collection("universities").Doc(id)
-	docSnap, err := docRef.Get(ctx)
-
+// FindUniversityByName looks up a university by exact name. Used when editing the
+// profile, where the client sends the name instead of the ID.
+func FindUniversityByName(ctx context.Context, name string) (*core.University, error) {
+	var university core.University
+	err := config.DB.WithContext(ctx).
+		First(&university, "name = ?", name).Error
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	name, err := docSnap.DataAt("name")
-	if err != nil {
-		return "", err
-	}
-
-	if nameStr, ok := name.(string); ok {
-		return nameStr, nil
-	}
-
-	return "", status.Error(404, "Not Found")
-
+	return &university, nil
 }

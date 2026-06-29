@@ -7,182 +7,107 @@ import (
 	"uniwave/internal/config"
 	"uniwave/internal/core"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
-// CreateUser creates a new user in the Firestore database.
+// CreateUser inserts a new user. The UUID is generated in the BeforeCreate hook.
 func CreateUser(ctx context.Context, user *core.User) error {
-	client, err := config.FirebaseApp.Firestore(ctx)
+	return config.DB.WithContext(ctx).Create(user).Error
+}
 
-	if err != nil {
-		return err
+// ActivateUser marks the account as activated (status = true).
+func ActivateUser(ctx context.Context, userID string) error {
+	res := config.DB.WithContext(ctx).
+		Model(&core.User{}).
+		Where("id = ?", userID).
+		Update("status", true)
+
+	if res.Error != nil {
+		return res.Error
 	}
-	defer client.Close()
-
-	docRef, _, err := client.Collection("users").Add(ctx, user)
-	if err != nil {
-		return err
+	if res.RowsAffected == 0 {
+		return errors.New("user not found")
 	}
-
-	user.ID = docRef.ID
 	return nil
 }
 
-func ActivateUser(ctx context.Context, userID string) error {
-	client, err := config.FirebaseApp.Firestore(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	doc, err := client.Collection("users").Doc(userID).Get(ctx)
-	if err != nil {
-		return err
-	}
-	data := doc.Data()
-	data["status"] = true
-
-	_, err = client.Collection("users").Doc(userID).Set(ctx, data)
-
-	return err
-}
-
+// Login looks up an activated user by email, preloading the university so the
+// name and theme can be returned without extra queries.
 func Login(ctx context.Context, email string) (*core.User, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	query := client.Collection("users").
-		Where("email", "==", email).
-		Where("status", "==", true).
-		Limit(1)
-
-	docs, err := query.Documents(ctx).GetAll()
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(docs) == 0 {
-		return nil, errors.New("user not found or not activated")
-	}
-
 	var user core.User
-	err = docs[0].DataTo(&user)
+	err := config.DB.WithContext(ctx).
+		Preload("University").
+		Where("email = ? AND status = ?", email, true).
+		First(&user).Error
+
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user not found or not activated")
+		}
 		return nil, err
 	}
-
-	user.ID = docs[0].Ref.ID
-
 	return &user, nil
 }
 
-// Find User by Firebase document ID
+// FindUserByID returns a user by ID with the university preloaded.
 func FindUserByID(ctx context.Context, userID string) (*core.User, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
+	var user core.User
+	err := config.DB.WithContext(ctx).
+		Preload("University").
+		First(&user, "id = ?", userID).Error
 
-	doc, err := client.Collection("users").Doc(userID).Get(ctx)
 	if err != nil {
-		if status.Code(err) == codes.NotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
 		}
 		return nil, err
 	}
-
-	var user core.User
-	if err := doc.DataTo(&user); err != nil {
-		return nil, err
-	}
-
-	user.ID = doc.Ref.ID
-
 	return &user, nil
 }
 
-// FindUserByEmail retrieves a user by their email address from the Firestore database.
-// It returns an error if the user is not found or if there is an issue with the
+// FindUserByEmail returns a user by email (regardless of activation status).
 func FindUserByEmail(ctx context.Context, email string) (*core.User, error) {
-	client, err := config.FirebaseApp.Firestore(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer client.Close()
-
-	query := client.Collection("users").Where("email", "==", email).Limit(1)
-	docs, err := query.Documents(ctx).GetAll()
-	if err != nil {
-		return nil, err
-	}
-
-	if len(docs) == 0 {
-		return nil, errors.New("user not found")
-	}
-
 	var user core.User
-	err = docs[0].DataTo(&user)
+	err := config.DB.WithContext(ctx).
+		Where("email = ?", email).
+		First(&user).Error
+
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("user not found")
+		}
 		return nil, err
 	}
-
-	user.ID = docs[0].Ref.ID
-
 	return &user, nil
 }
 
+// UpdateUser saves the user's changes. The University association is omitted so
+// the universities table is not touched when updating the profile.
 func UpdateUser(ctx context.Context, user *core.User) error {
-	client, err := config.FirebaseApp.Firestore(ctx)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-	docRef := client.Collection("users").Doc(user.ID)
-	_, err = docRef.Set(ctx, user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return config.DB.WithContext(ctx).Omit("University").Save(user).Error
 }
 
-func VerifyPassword(ctx context.Context, userId string, password string) (bool, error) {
-
-	// Create the connection with the db
-	client, err := config.FirebaseApp.Firestore(ctx)
+// VerifyPassword checks that the given password matches the user's.
+func VerifyPassword(ctx context.Context, userID string, password string) (bool, error) {
+	user, err := FindUserByID(ctx, userID)
 	if err != nil {
 		return false, err
 	}
-
-	// On failed, closes the connection
-	defer client.Close()
-
-	// search the user
-	doc, err := client.Collection("users").Doc(userId).Get(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	var user core.User
-
-	if err := doc.DataTo(&user); err != nil {
-		return false, err
-	}
-	user.ID = doc.Ref.ID
-
-	// Compares the old password of the server with the incoming old password
-	// typed by the user
-
-	if !user.CheckPassword(password) {
-		return false, nil
-	}
-
-	return true, nil
+	return user.CheckPassword(password), nil
 }
 
-func GetUserStats(ctx context.Context) {}
+// GetUserStats returns the post, follower and following counts.
+func GetUserStats(ctx context.Context, userID string) (map[string]int, error) {
+	db := config.DB.WithContext(ctx)
+
+	var posts, followers, following int64
+	db.Model(&core.Post{}).Where("author_id = ?", userID).Count(&posts)
+	db.Model(&core.Follow{}).Where("following_id = ?", userID).Count(&followers)
+	db.Model(&core.Follow{}).Where("follower_id = ?", userID).Count(&following)
+
+	return map[string]int{
+		"posts":     int(posts),
+		"followers": int(followers),
+		"following": int(following),
+	}, nil
+}

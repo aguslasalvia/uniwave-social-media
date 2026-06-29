@@ -15,7 +15,7 @@ func NewSettingsController() *SettingsController {
 }
 
 func (sc *SettingsController) GetSettings(c *gin.Context) {
-	userID := c.GetString("userID")
+	userID := c.GetString("user_id")
 	settings, err := models.GetSettingsByUserID(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve settings"})
@@ -32,7 +32,7 @@ func (sc *SettingsController) UpdateSettings(c *gin.Context) {
 		return
 	}
 
-	userID := c.GetString("user_ID")
+	userID := c.GetString("user_id")
 	if err := models.UpdateSettings(c.Request.Context(), userID, &settings); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not update settings"})
 		return

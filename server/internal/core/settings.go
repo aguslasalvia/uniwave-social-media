@@ -1,9 +1,12 @@
 package core
 
+// Settings is each user's personal configuration. It has a 1-to-1 relation with
+// User through UserID (which is also the table's primary key).
 type Settings struct {
-	Language             string `json:"language" firestore:"language"`
-	Background           string `json:"background" firestore:"background"`
-	PrimaryColor         string `json:"primaryColor" firestore:"primaryColor"`
-	SecondaryColor       string `json:"secondaryColor" firestore:"secondaryColor"`
-	NotificationsEnabled bool   `json:"notificationsEnabled" firestore:"notificationsEnabled"`
+	UserID               string `gorm:"type:uuid;primaryKey" json:"-"`
+	Language             string `json:"language"`
+	Background           string `json:"background"`
+	PrimaryColor         string `json:"primaryColor"`
+	SecondaryColor       string `json:"secondaryColor"`
+	NotificationsEnabled bool   `json:"notificationsEnabled"`
 }

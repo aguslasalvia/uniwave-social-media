@@ -3,9 +3,8 @@ package services
 import (
 	"bytes"
 	"log"
-	"text/template"
-
 	"os"
+	"text/template"
 
 	"gopkg.in/mail.v2"
 )
@@ -17,7 +16,14 @@ type ActivationData struct {
 
 func SendActivationEmail(to string, data ActivationData) error {
 
-	t, err := template.ParseFiles("templates/activation.html")
+	// The template is read at runtime so it can be edited without rebuilding.
+	// The path is configurable (handy for Docker) with a sensible default.
+	templatePath := os.Getenv("ACTIVATION_TEMPLATE_PATH")
+	if templatePath == "" {
+		templatePath = "internal/templates/activation.html"
+	}
+
+	t, err := template.ParseFiles(templatePath)
 	if err != nil {
 		return err
 	}

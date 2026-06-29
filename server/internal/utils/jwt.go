@@ -12,10 +12,9 @@ import (
 var jwtSecret []byte
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
+	// .env is optional: in containerized/production environments the variables
+	// are provided directly, so a missing file is not fatal.
+	_ = godotenv.Load()
 
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {

@@ -3,18 +3,22 @@ import "../global.css";
 import Navbar from "../components/Navbar.astro";
 ---
 
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+		<meta
+			name="description"
+			content="UniWave: la app para conectar con tu universidad. Compartí momentos, encontrá grupos y enterate de todo lo que pasa en tu facu. Gratis para estudiantes."
+		/>
 		<link rel="icon" href="/logo.png" type="image/png" />
 		<link
 			href="https://cdn.boxicons.com/fonts/basic/boxicons.min.css"
 			rel="stylesheet"
 		/>
 
-		<title>🎓 UniWave - Landing 🎓</title>
+		<title>UniWave — La red social de tu facu</title>
 	</head>
 	<body>
 		<Navbar />
@@ -27,16 +31,15 @@ import Navbar from "../components/Navbar.astro";
 <style>
 	html {
 		background-color: var(--bg-color);
-		height: 100vh;
 		width: 100%;
-		display: flex;
-		justify-content: center;
 	}
 	body {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: stretch;
 		width: 100%;
-		max-width: 1900px;
+	}
+	main {
+		width: 100%;
 	}
 </style>

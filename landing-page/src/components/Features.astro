@@ -4,13 +4,13 @@ const features = [
 		img: "/examples/example1.jpg",
 		emoji: "🔐",
 		title: "Iniciar Sesión",
-		description: "Accede a tu cuenta de forma segura y rápida",
+		description: "Accedé a tu cuenta de forma segura y rápida",
 	},
 	{
 		img: "/examples/example2.jpg",
 		emoji: "📝",
 		title: "Registrarse",
-		description: "Crea tu cuenta y únete a la comunidad universitaria",
+		description: "Creá tu cuenta y unite a la comunidad universitaria",
 	},
 	{
 		img: "/examples/example3.jpg",
@@ -41,25 +41,25 @@ const features = [
 
 <section id="features">
 	<div class="features-header">
-		<span class="section-tag">Funcionalidades</span>
-		<h2>Todo lo que UniWave tiene para vos</h2>
-		<p>Una experiencia diseñada para conectar, compartir y vivir la universidad al máximo</p>
+		<span class="stamp">Funcionalidades</span>
+		<h2>La cartelera: así se ve por dentro</h2>
+		<p>Capturas reales de la app, colgadas como en la cartelera de tu facultad</p>
 	</div>
 
-	<div class="features-grid">
+	<div class="board">
 		{
 			features.map((feature) => (
-				<div class="feature-card">
-					<div class="feature-image">
-						<img src={feature.img} alt={feature.title} loading="lazy" />
-						<div class="feature-overlay" aria-hidden="true" />
+				<article class="pinned">
+					<span class="tape" aria-hidden="true" />
+					<div class="shot">
+						<img src={feature.img} alt={`UniWave — ${feature.title}`} loading="lazy" />
 					</div>
-					<div class="feature-content">
+					<h3>
 						<span class="feature-emoji" aria-hidden="true">{feature.emoji}</span>
-						<h3>{feature.title}</h3>
-						<p>{feature.description}</p>
-					</div>
-				</div>
+						{feature.title}
+					</h3>
+					<p>{feature.description}</p>
+				</article>
 			))
 		}
 	</div>
@@ -73,10 +73,10 @@ const features = [
 
 <style>
 	#features {
-		padding: 6rem 2rem;
-		max-width: 1300px;
-		margin: 0 auto;
-		width: 100%;
+		background:
+			radial-gradient(ellipse 50% 45% at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 70%),
+			var(--bg-secondary);
+		padding: 5rem 2rem 6rem;
 	}
 
 	.features-header {
@@ -84,24 +84,13 @@ const features = [
 		margin-bottom: 4rem;
 	}
 
-	.section-tag {
-		display: inline-block;
-		background: rgba(129, 140, 248, 0.12);
-		color: var(--primary-light);
-		padding: 0.4rem 1rem;
-		border-radius: 50px;
-		font-size: 0.8rem;
-		font-weight: 600;
-		margin-bottom: 1.25rem;
-		border: 1px solid rgba(129, 140, 248, 0.22);
-	}
-
 	.features-header h2 {
 		color: var(--text-color);
-		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-		margin: 0 0 1rem 0;
+		font-size: clamp(1.85rem, 3.5vw, 2.6rem);
+		margin: 1.5rem 0 0.875rem;
 		font-weight: 800;
-		letter-spacing: -0.75px;
+		letter-spacing: -0.02em;
+		line-height: 1.15;
 	}
 
 	.features-header p {
@@ -112,90 +101,83 @@ const features = [
 		line-height: 1.7;
 	}
 
-	.features-grid {
+	.board {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 1.5rem;
+		gap: 2.5rem 2rem;
+		max-width: 1160px;
+		margin: 0 auto;
 	}
 
-	.feature-card {
+	.pinned {
 		position: relative;
-		border-radius: 22px;
-		overflow: hidden;
-		height: 360px;
-		transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.1),
-					box-shadow 0.35s ease,
-					border-color 0.35s ease;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		cursor: default;
+		background: var(--text-color);
+		border-radius: 6px;
+		padding: 0.875rem 0.875rem 1.25rem;
+		box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+					box-shadow 0.35s ease;
 	}
 
-	.feature-card:hover {
-		transform: translateY(-8px);
-		box-shadow: 0 24px 48px rgba(99, 102, 241, 0.18);
-		border-color: rgba(129, 140, 248, 0.28);
+	/* Each note hangs at its own slight angle, like real pinned paper */
+	.pinned:nth-child(6n + 1) { transform: rotate(-1.6deg); }
+	.pinned:nth-child(6n + 2) { transform: rotate(1.3deg); }
+	.pinned:nth-child(6n + 3) { transform: rotate(-0.8deg); }
+	.pinned:nth-child(6n + 4) { transform: rotate(1.6deg); }
+	.pinned:nth-child(6n + 5) { transform: rotate(-1.1deg); }
+	.pinned:nth-child(6n + 6) { transform: rotate(0.9deg); }
+
+	.pinned:hover {
+		transform: rotate(0deg) translateY(-8px);
+		box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55), 0 0 40px rgba(99, 102, 241, 0.15);
 	}
 
-	.feature-image {
+	.tape {
 		position: absolute;
-		inset: 0;
-		height: 65%;
+		top: -13px;
+		left: 50%;
+		width: 96px;
+		height: 27px;
+		transform: translateX(-50%) rotate(-2.5deg);
+		background: rgba(165, 180, 252, 0.4);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 		z-index: 1;
 	}
 
-	.feature-image img {
+	.shot {
+		border-radius: 4px;
+		overflow: hidden;
+		aspect-ratio: 9 / 12;
+	}
+
+	.shot img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform 0.5s ease;
+		object-position: top;
+		display: block;
 	}
 
-	.feature-card:hover .feature-image img {
-		transform: scale(1.06);
-	}
-
-	.feature-overlay {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(
-			180deg,
-			rgba(8, 12, 24, 0.15) 0%,
-			rgba(8, 12, 24, 0.98) 100%
-		);
-		z-index: 2;
-	}
-
-	.feature-content {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		padding: 1.75rem;
-		z-index: 3;
+	.pinned h3 {
 		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--bg-secondary);
+		font-size: 1.15rem;
+		margin: 1rem 0.25rem 0.3rem;
+		font-weight: 700;
+		letter-spacing: -0.01em;
 	}
 
 	.feature-emoji {
-		font-size: 1.75rem;
+		font-size: 1.1rem;
 		line-height: 1;
-		margin-bottom: 0.25rem;
 	}
 
-	.feature-content h3 {
-		color: var(--text-color);
-		font-size: 1.2rem;
-		margin: 0;
-		font-weight: 700;
-		letter-spacing: -0.25px;
-	}
-
-	.feature-content p {
-		color: rgba(241, 245, 249, 0.65);
-		margin: 0;
-		font-size: 0.88rem;
+	.pinned p {
+		color: rgba(13, 21, 38, 0.68);
+		margin: 0 0.25rem;
+		font-size: 0.9rem;
 		line-height: 1.55;
 	}
 
@@ -204,58 +186,56 @@ const features = [
 		display: none;
 		justify-content: center;
 		gap: 5px;
-		margin-top: 1.25rem;
+		margin-top: 1.5rem;
 	}
 
 	.scroll-hint span {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
-		background: var(--border-hover);
+		background: var(--primary-color);
+		opacity: 0.35;
 	}
 
 	.scroll-hint span:first-child {
-		background: var(--primary-color);
+		opacity: 1;
 	}
 
 	@media (max-width: 1024px) {
-		.features-grid {
+		.board {
 			grid-template-columns: repeat(2, 1fr);
+			max-width: 720px;
 		}
 	}
 
 	@media (max-width: 768px) {
 		#features {
-			padding: 4.5rem 0 4.5rem;
+			padding: 4rem 0 4.5rem;
 		}
 
 		.features-header {
 			padding: 0 1.5rem;
+			margin-bottom: 3rem;
 		}
 
-		.features-header h2 {
-			font-size: 1.75rem;
-		}
-
-		.features-grid {
+		.board {
 			display: flex;
 			overflow-x: auto;
 			scroll-snap-type: x mandatory;
 			-webkit-overflow-scrolling: touch;
-			gap: 1rem;
-			padding: 0.5rem 1.5rem 1.25rem;
+			gap: 1.5rem;
+			padding: 1rem 1.5rem 1.5rem;
 			scrollbar-width: none;
-			grid-template-columns: unset;
+			max-width: none;
 		}
 
-		.features-grid::-webkit-scrollbar {
+		.board::-webkit-scrollbar {
 			display: none;
 		}
 
-		.feature-card {
-			flex: 0 0 280px;
-			scroll-snap-align: start;
-			height: 320px;
+		.pinned {
+			flex: 0 0 250px;
+			scroll-snap-align: center;
 		}
 
 		.scroll-hint {
@@ -263,9 +243,9 @@ const features = [
 		}
 	}
 
-	@media (max-width: 480px) {
-		.feature-card {
-			flex: 0 0 260px;
+	@media (prefers-reduced-motion: reduce) {
+		.pinned:hover {
+			transform: none;
 		}
 	}
 </style>

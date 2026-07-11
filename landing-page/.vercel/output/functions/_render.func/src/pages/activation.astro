@@ -1,0 +1,12 @@
+---
+import MainLayout from "../layouts/MainLayout.astro";
+import ActivationComponent from "../components/react/Activation.tsx";
+import Footer from "../components/Footer.astro";
+const url = new URL(Astro.request.url);
+const token = url.searchParams.get("token");
+---
+
+<MainLayout>
+	<ActivationComponent token={token as string} client:load />
+	<!-- <Footer /> -->
+</MainLayout>

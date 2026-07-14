@@ -1,15 +1,13 @@
-import Constants from "expo-constants";
-
-const extra = Constants.expoConfig?.extra ?? {};
-
 const DEFAULT_API_URL = "http://localhost:8080";
 
-// Acceder a las variables de entorno definidas en app.json (campo "extra").
+// EXPO_PUBLIC_* vars are inlined into the JS bundle at build/start time by
+// Metro, read straight from .env — no need to round-trip through app.json's
+// "extra" field (which used to hold a second, easily-stale copy of these).
 export const config = {
-  apiUrl: extra.apiUrl || DEFAULT_API_URL,
-  environment: extra.environment || "development",
+  apiUrl: process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL,
+  environment: process.env.EXPO_PUBLIC_ENV || "development",
 };
 
-// Accesos directos
-export const getApiUrl = (): string => extra.apiUrl || DEFAULT_API_URL;
-export const getEnvironment = (): string => extra.environment || "development";
+// Shortcuts
+export const getApiUrl = (): string => config.apiUrl;
+export const getEnvironment = (): string => config.environment;

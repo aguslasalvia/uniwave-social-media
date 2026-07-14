@@ -1,10 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Plus } from "lucide-react-native";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { withAlpha } from "@/constants/Colors";
+import { useColors } from "@/hooks/useColors";
 
 interface StoryItemProps {
   name: string;
@@ -19,36 +19,35 @@ export function StoryItem({
   isAdd = false,
   onPress,
 }: StoryItemProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View
         style={[
-          styles.avatarContainer,
-          {
-            backgroundColor: isAdd
-              ? colors.tint
-              : colorScheme === "dark"
-                ? "#1e293b"
-                : "#f8fafc",
-            borderColor: isAdd
-              ? colors.tint
-              : colorScheme === "dark"
-                ? "#334155"
-                : "#e2e8f0",
-          },
+          styles.avatarRing,
+          { borderColor: isAdd ? colors.border : colors.tint },
         ]}
       >
-        {isAdd ? (
-          <Ionicons name="add" size={24} color="#ffffff" />
-        ) : (
-          <Text style={styles.avatarText}>{avatar}</Text>
-        )}
+        <View
+          style={[
+            styles.avatarContainer,
+            {
+              backgroundColor: isAdd
+                ? withAlpha(colors.tint, 0.12)
+                : colors.surfaceMuted,
+            },
+          ]}
+        >
+          {isAdd ? (
+            <Plus size={22} color={colors.tint} strokeWidth={2.5} />
+          ) : (
+            <Text style={styles.avatarText}>{avatar}</Text>
+          )}
+        </View>
       </View>
       <ThemedText
-        style={[styles.name, { color: colors.text }]}
+        style={[styles.name, { color: colors.textMuted }]}
         numberOfLines={1}
       >
         {name}
@@ -60,19 +59,21 @@ export function StoryItem({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    marginRight: 16,
-    width: 70,
+    marginRight: 14,
+    width: 68,
+  },
+  avatarRing: {
+    borderWidth: 2,
+    borderRadius: 33,
+    padding: 3,
+    marginBottom: 6,
   },
   avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
-    borderWidth: 2,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
-    elevation: 4,
   },
   avatarText: {
     fontSize: 24,

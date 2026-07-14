@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
+import { useColors } from "@/hooks/useColors";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface SkeletonCardProps {
   width?: number;
@@ -10,24 +10,24 @@ interface SkeletonCardProps {
 }
 
 export function SkeletonCard({
-  width = 120,
-  height = 140,
+  width = 96,
+  height = 116,
   style,
 }: SkeletonCardProps) {
-  const colorScheme = useColorScheme();
-  const fadeAnim = useRef(new Animated.Value(0.3)).current;
+  const colors = useColors();
+  const fadeAnim = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(fadeAnim, {
           toValue: 0.7,
-          duration: 1000,
+          duration: 900,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
-          toValue: 0.3,
-          duration: 1000,
+          toValue: 0.35,
+          duration: 900,
           useNativeDriver: true,
         }),
       ]),
@@ -37,24 +37,16 @@ export function SkeletonCard({
     return () => animation.stop();
   }, [fadeAnim]);
 
+  const bone = { backgroundColor: colors.surfaceMuted };
+
   return (
     <Animated.View
-      style={[
-        styles.container,
-        {
-          width,
-          height,
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-          opacity: fadeAnim,
-        },
-        style,
-      ]}
+      style={[styles.container, { width, height, opacity: fadeAnim }, style]}
     >
-      <View style={styles.iconSkeleton} />
+      <View style={[styles.iconSkeleton, bone]} />
       <View style={styles.contentSkeleton}>
-        <View style={styles.titleSkeleton} />
-        <View style={styles.subtitleSkeleton} />
+        <View style={[styles.titleSkeleton, bone]} />
+        <View style={[styles.subtitleSkeleton, bone]} />
       </View>
     </Animated.View>
   );
@@ -62,18 +54,14 @@ export function SkeletonCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
-    borderWidth: 1,
-    marginRight: 16,
-    padding: 16,
+    marginRight: 18,
     alignItems: "center",
   },
   iconSkeleton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#e2e8f0",
-    marginBottom: 12,
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    marginBottom: 10,
   },
   contentSkeleton: {
     alignItems: "center",
@@ -82,14 +70,12 @@ const styles = StyleSheet.create({
   titleSkeleton: {
     width: "80%",
     height: 12,
-    backgroundColor: "#e2e8f0",
     borderRadius: 6,
     marginBottom: 8,
   },
   subtitleSkeleton: {
     width: "60%",
     height: 10,
-    backgroundColor: "#e2e8f0",
     borderRadius: 5,
   },
 });

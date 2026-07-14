@@ -1,15 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Eye, EyeOff, LucideIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { useColors } from "@/hooks/useColors";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface FormInputProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: LucideIcon;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
@@ -22,7 +21,7 @@ export function FormInput({
   placeholder,
   value,
   onChangeText,
-  icon,
+  icon: Icon,
   secureTextEntry = false,
   keyboardType = "default",
   autoCapitalize = "none",
@@ -31,49 +30,51 @@ export function FormInput({
   editable = true,
 }: FormInputProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const [focused, setFocused] = useState(false);
+  const colors = useColors();
 
   const isPassword = secureTextEntry;
-  const shouldShowEyeIcon = isPassword;
+  const EyeToggle = showPassword ? Eye : EyeOff;
 
   return (
-    <View style={[styles.inputContainer, style]}>
-      <Ionicons
-        name={icon}
-        size={20}
-        color={colors.tint}
-        style={styles.inputIcon}
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.surface,
+          borderColor: focused ? colors.tint : colors.border,
+        },
+        style,
+      ]}
+    >
+      <Icon
+        size={19}
+        color={focused ? colors.tint : colors.textMuted}
+        strokeWidth={2}
       />
       <TextInput
-        style={[
-          styles.input,
-          {
-            color: colors.text,
-            backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-            borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-          },
-        ]}
+        style={[styles.input, { color: colors.text }]}
         placeholder={placeholder}
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.textMuted}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         secureTextEntry={isPassword ? !showPassword : false}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
         editable={editable}
       />
-      {shouldShowEyeIcon && (
+      {isPassword && (
         <TouchableOpacity
-          style={styles.eyeIcon}
+          style={styles.eyeButton}
           onPress={() => setShowPassword(!showPassword)}
+          accessibilityLabel={
+            showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+          }
         >
-          <Ionicons
-            name={showPassword ? "eye" : "eye-off"}
-            size={20}
-            color={colors.icon}
-          />
+          <EyeToggle size={19} color={colors.textMuted} strokeWidth={2} />
         </TouchableOpacity>
       )}
     </View>
@@ -81,37 +82,22 @@ export function FormInput({
 }
 
 const styles = StyleSheet.create({
-  inputContainer: {
-    position: "relative",
-    borderRadius: 16,
-    overflow: "hidden",
-    // Sombras para iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    // Elevación para Android
-    elevation: 2,
-  },
-  inputIcon: {
-    position: "absolute",
-    left: 16,
-    top: 16,
-    zIndex: 1,
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 54,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    gap: 12,
   },
   input: {
-    height: 56,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 48,
-    fontSize: 16,
+    flex: 1,
+    height: "100%",
+    fontSize: 15,
     fontWeight: "500",
   },
-  eyeIcon: {
-    position: "absolute",
-    right: 16,
-    top: 16,
-    zIndex: 1,
+  eyeButton: {
     padding: 4,
   },
 });

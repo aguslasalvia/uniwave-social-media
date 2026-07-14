@@ -1,15 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
+import { LucideIcon } from "lucide-react-native";
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColors } from "@/hooks/useColors";
 
 interface SocialButtonProps {
   title: string;
   onPress: () => void;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: LucideIcon;
   iconColor?: string;
   style?: any;
   activeOpacity?: number;
@@ -18,28 +17,24 @@ interface SocialButtonProps {
 export function SocialButton({
   title,
   onPress,
-  icon,
+  icon: Icon,
   iconColor,
   style,
-  activeOpacity = 0.8,
+  activeOpacity = 0.85,
 }: SocialButtonProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-        },
+        { backgroundColor: colors.surface, borderColor: colors.border },
         style,
       ]}
       onPress={onPress}
       activeOpacity={activeOpacity}
     >
-      <Ionicons name={icon} size={20} color={iconColor || "#DB4437"} />
+      <Icon size={20} color={iconColor || colors.text} strokeWidth={2} />
       <ThemedText style={[styles.text, { color: colors.text }]}>
         {title}
       </ThemedText>
@@ -52,21 +47,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 1,
+    height: 54,
+    borderRadius: 14,
+    borderWidth: 1.5,
     paddingHorizontal: 24,
-    overflow: "hidden",
-    // Sombras para iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    // Elevación para Android
-    elevation: 2,
-  },
-  icon: {
-    marginRight: 12,
+    gap: 10,
   },
   text: {
     fontSize: 16,

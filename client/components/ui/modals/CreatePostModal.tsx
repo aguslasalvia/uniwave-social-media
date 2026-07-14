@@ -1,8 +1,15 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import {
+  CircleX,
+  Globe,
+  ImagePlus,
+  Lock,
+  LucideIcon,
+  Users,
+  X,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   Modal,
   ScrollView,
@@ -13,11 +20,11 @@ import {
   View,
 } from "react-native";
 
-import { SolidButton } from "@/components";
-import { Colors } from "@/constants/Colors";
+import { ToastHost, useToast } from "@/components/ui/toast";
+import { withAlpha } from "@/constants/Colors";
 import { UserProfile } from "@/core/User";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { userService } from "@/services/userService";
+import { useColors } from "@/hooks/useColors";
 
 interface CreatePostModalProps {
   visible: boolean;
@@ -30,12 +37,11 @@ export function CreatePostModal({
   onClose,
   onCreate,
 }: CreatePostModalProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
+  const { showToast } = useToast();
 
   const [content, setContent] = useState("");
   const [privacy, setPrivacy] = useState("public"); // public, friends, private
-  const [imageUrl, setImageUrl] = useState("");
   const [pickedImage, setPickedImage] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>();
@@ -53,11 +59,11 @@ export function CreatePostModal({
     };
 
     fetchUserProfile();
-  }, [visible]); // Fetch user profile when modal opens or closes
+  }, [visible]);
 
   const handleCreate = async () => {
     if (!content.trim()) {
-      Alert.alert("Por favor escribe algo para tu publicación");
+      showToast("Por favor escribe algo para tu publicación", "error");
       return;
     }
 
@@ -74,14 +80,13 @@ export function CreatePostModal({
       } as any);
     }
 
-    onCreate(formData); // tu función hará axios/fetch con multipart/form-data
+    onCreate(formData);
     handleClose();
   };
 
   const handleClose = () => {
     setContent("");
     setPrivacy("public");
-    setImageUrl("");
     setPickedImage(null);
     onClose();
   };
@@ -92,7 +97,7 @@ export function CreatePostModal({
       const permission =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert("Se requiere permiso para acceder a la galería.");
+        showToast("Se requiere permiso para acceder a la galería.", "error");
         setPicking(false);
         return;
       }
@@ -105,52 +110,52 @@ export function CreatePostModal({
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setPickedImage(result.assets[0].uri);
       }
-    } catch (e) {
-      Alert.alert("Error al seleccionar la imagen.");
+    } catch {
+      showToast("Error al seleccionar la imagen.", "error");
     } finally {
       setPicking(false);
     }
   };
 
-  const removeImage = () => {
-    setPickedImage(null);
-  };
+  const displayName = userProfile?.fullName || userProfile?.username || "U";
 
   const PrivacyOption = ({
     value,
     label,
-    icon,
+    icon: Icon,
   }: {
     value: string;
     label: string;
-    icon: string;
-  }) => (
-    <TouchableOpacity
-      style={[
-        styles.privacyOption,
-        {
-          backgroundColor:
-            privacy === value
-              ? colors.tint
-              : colorScheme === "dark"
-                ? "#1e293b"
-                : "#f8fafc",
-          borderColor: privacy === value ? colors.tint : colors.icon,
-        },
-      ]}
-      onPress={() => setPrivacy(value)}
-    >
-      <Text style={styles.privacyIcon}>{icon}</Text>
-      <Text
+    icon: LucideIcon;
+  }) => {
+    const selected = privacy === value;
+    return (
+      <TouchableOpacity
         style={[
-          styles.privacyLabel,
-          { color: privacy === value ? "#ffffff" : colors.text },
+          styles.privacyOption,
+          {
+            backgroundColor: selected ? colors.tint : colors.surface,
+            borderColor: selected ? colors.tint : colors.border,
+          },
         ]}
+        onPress={() => setPrivacy(value)}
       >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+        <Icon
+          size={16}
+          color={selected ? "#ffffff" : colors.textMuted}
+          strokeWidth={2}
+        />
+        <Text
+          style={[
+            styles.privacyLabel,
+            { color: selected ? "#ffffff" : colors.text },
+          ]}
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Modal
@@ -159,167 +164,114 @@ export function CreatePostModal({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colorScheme === "dark" ? "#0f172a" : "#ffffff" },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {/* RN's Modal opens its own native layer, so the toast host at the
+            app root can't show through it — mount a local one here. */}
+        <ToastHost />
+
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.text} />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.closeButton}
+            accessibilityLabel="Cerrar"
+          >
+            <X size={22} color={colors.text} strokeWidth={2} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Crear Publicación
+            Nueva publicación
           </Text>
-          <TouchableOpacity onPress={handleCreate} style={styles.createButton}>
-            <Text style={[styles.createButtonText, { color: colors.tint }]}>
-              Publicar
-            </Text>
+          <TouchableOpacity
+            onPress={handleCreate}
+            style={[styles.publishButton, { backgroundColor: colors.tint }]}
+          >
+            <Text style={styles.publishButtonText}>Publicar</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* User Info */}
+          {/* User */}
           <View style={styles.userInfo}>
             <View
               style={[
                 styles.avatar,
-                {
-                  backgroundColor:
-                    colorScheme === "dark" ? "#334155" : "#f8fafc",
-                },
+                { backgroundColor: withAlpha(colors.tint, 0.14) },
               ]}
             >
-              <Text style={styles.avatarText}>🎨</Text>
-            </View>
-            <View style={styles.userDetails}>
-              <Text style={[styles.userName, { color: colors.text }]}>
-                {userProfile?.username}
+              <Text style={[styles.avatarText, { color: colors.tint }]}>
+                {displayName.charAt(0).toUpperCase()}
               </Text>
-              {/* <Text style={[styles.userUniversity, { color: colors.icon }]}>
-								Universidad de Artes y Humanidades
-							</Text> */}
             </View>
-          </View>
-
-          {/* Content Input */}
-          <View style={styles.contentSection}>
-            <TextInput
-              style={[
-                styles.contentInput,
-                {
-                  color: colors.text,
-                  backgroundColor:
-                    colorScheme === "dark" ? "#1e293b" : "#f8fafc",
-                  borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                },
-              ]}
-              placeholder="¿Qué quieres compartir con tu comunidad universitaria?"
-              placeholderTextColor={colors.icon}
-              value={content}
-              onChangeText={setContent}
-              multiline
-              textAlignVertical="top"
-              autoFocus
-            />
-          </View>
-
-          {/* Image Picker & URL Input */}
-          <View style={styles.imageSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Imagen (opcional)
+            <Text style={[styles.userName, { color: colors.text }]}>
+              {userProfile?.username}
             </Text>
-            <View style={styles.imagePickerRow}>
+          </View>
+
+          {/* Content */}
+          <TextInput
+            style={[
+              styles.contentInput,
+              {
+                color: colors.text,
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholder="¿Qué querés compartir con tu comunidad?"
+            placeholderTextColor={colors.textMuted}
+            value={content}
+            onChangeText={setContent}
+            multiline
+            textAlignVertical="top"
+            autoFocus
+          />
+
+          {/* Image */}
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
+            IMAGEN
+          </Text>
+          {pickedImage ? (
+            <View style={styles.imagePreviewContainer}>
+              <Image
+                source={{ uri: pickedImage }}
+                style={styles.imagePreview}
+                resizeMode="cover"
+              />
               <TouchableOpacity
-                style={[styles.imagePickerButton, { borderColor: colors.tint }]}
-                onPress={pickImage}
-                disabled={picking}
+                style={styles.removeImageButton}
+                onPress={() => setPickedImage(null)}
+                accessibilityLabel="Quitar imagen"
               >
-                <Ionicons name="images-outline" size={20} color={colors.tint} />
-                <Text style={[styles.imagePickerText, { color: colors.tint }]}>
-                  Elegir de galería
-                </Text>
+                <CircleX size={24} color="#ffffff" fill="rgba(0,0,0,0.55)" />
               </TouchableOpacity>
-              {pickedImage && (
-                <TouchableOpacity
-                  style={styles.removeImageButton}
-                  onPress={removeImage}
-                >
-                  <Ionicons name="close-circle" size={20} color={colors.icon} />
-                </TouchableOpacity>
-              )}
             </View>
-            {pickedImage && (
-              <View style={styles.imagePreviewContainer}>
-                <Image
-                  source={{ uri: pickedImage }}
-                  style={styles.imagePreview}
-                  resizeMode="cover"
-                />
-              </View>
-            )}
-            <Text style={[styles.sectionSubtitle, { color: colors.icon }]}>
-              o ingresa una URL:
-            </Text>
-            <View
+          ) : (
+            <TouchableOpacity
               style={[
-                styles.imageInputContainer,
+                styles.imagePickerButton,
                 {
-                  backgroundColor:
-                    colorScheme === "dark" ? "#1e293b" : "#f8fafc",
-                  borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
+                  borderColor: colors.border,
+                  backgroundColor: colors.surface,
                 },
               ]}
+              onPress={pickImage}
+              disabled={picking}
             >
-              <Ionicons
-                name="image-outline"
-                size={20}
-                color={colors.icon}
-                style={styles.imageIcon}
-              />
-              <TextInput
-                style={[styles.imageInput, { color: colors.text }]}
-                placeholder="URL de la imagen..."
-                placeholderTextColor={colors.icon}
-                value={imageUrl}
-                onChangeText={setImageUrl}
-                keyboardType="url"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-          </View>
-
-          {/* Privacy Settings */}
-          <View style={styles.privacySection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Privacidad
-            </Text>
-            <View style={styles.privacyOptions}>
-              <PrivacyOption value="public" label="Público" icon="🌍" />
-              <PrivacyOption value="friends" label="Amigos" icon="👥" />
-              <PrivacyOption value="private" label="Privado" icon="🔒" />
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.cancelButton, { borderColor: colors.icon }]}
-              onPress={handleClose}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                Cancelar
+              <ImagePlus size={20} color={colors.tint} strokeWidth={2} />
+              <Text style={[styles.imagePickerText, { color: colors.tint }]}>
+                {picking ? "Abriendo galería..." : "Agregar una imagen"}
               </Text>
             </TouchableOpacity>
+          )}
 
-            <SolidButton
-              title="Crear Publicación"
-              onPress={handleCreate}
-              style={styles.createPostButton}
-            />
+          {/* Privacy */}
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
+            ¿QUIÉN PUEDE VERLO?
+          </Text>
+          <View style={styles.privacyOptions}>
+            <PrivacyOption value="public" label="Público" icon={Globe} />
+            <PrivacyOption value="friends" label="Amigos" icon={Users} />
+            <PrivacyOption value="private" label="Privado" icon={Lock} />
           </View>
         </ScrollView>
       </View>
@@ -335,24 +287,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.1)",
   },
   closeButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  createButton: {
-    padding: 8,
-  },
-  createButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
+  },
+  publishButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  publishButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -361,109 +315,73 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     marginTop: 20,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
   avatarText: {
-    fontSize: 24,
-  },
-  userDetails: {
-    flex: 1,
+    fontSize: 18,
+    fontWeight: "800",
   },
   userName: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  userUniversity: {
-    fontSize: 14,
-  },
-  contentSection: {
-    marginBottom: 24,
+    fontSize: 15,
+    fontWeight: "700",
   },
   contentInput: {
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: 1.5,
+    borderRadius: 16,
     padding: 16,
-    minHeight: 120,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  imageSection: {
+    minHeight: 140,
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    marginBottom: 8,
-  },
-  imagePickerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
+  sectionLabel: {
+    fontSize: 11.5,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginBottom: 10,
   },
   imagePickerButton: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    marginRight: 4,
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderRadius: 14,
+    paddingVertical: 16,
+    marginBottom: 24,
   },
   imagePickerText: {
     fontSize: 14,
-    fontWeight: "500",
-    marginLeft: 6,
-  },
-  removeImageButton: {
-    marginLeft: 4,
+    fontWeight: "600",
   },
   imagePreviewContainer: {
-    marginTop: 8,
-    marginBottom: 8,
-    alignItems: "center",
+    marginBottom: 24,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   imagePreview: {
-    width: 180,
-    height: 120,
-    borderRadius: 12,
-    resizeMode: "cover",
+    width: "100%",
+    height: 200,
   },
-  imageInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  imageIcon: {
-    marginRight: 12,
-  },
-  imageInput: {
-    flex: 1,
-    fontSize: 16,
-  },
-  privacySection: {
-    marginBottom: 24,
+  removeImageButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
   privacyOptions: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
+    marginBottom: 40,
   },
   privacyOption: {
     flex: 1,
@@ -471,37 +389,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 8,
-  },
-  privacyIcon: {
-    fontSize: 16,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    gap: 7,
   },
   privacyLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  actions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 32,
-    marginBottom: 40,
-  },
-  cancelButton: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "600",
-  },
-  createPostButton: {
-    flex: 1,
   },
 });

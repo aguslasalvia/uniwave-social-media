@@ -1,89 +1,207 @@
-import { Ionicons } from "@expo/vector-icons";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
-import React from "react";
-import { Platform } from "react-native";
+import { Compass, House, LucideIcon, UserRound, X } from "lucide-react-native";
+import React, { useRef, useState } from "react";
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { withAlpha } from "@/constants/Colors";
+import { useColors } from "@/hooks/useColors";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+const TAB_META: Record<string, { icon: LucideIcon; label: string }> = {
+  home: { icon: House, label: "Inicio" },
+  explore: { icon: Compass, label: "Explorar" },
+  profile: { icon: UserRound, label: "Perfil" },
+};
+
+// Floating navigation bubble: collapsed it shows the current page's icon;
+// tapping it fans the page options out to the left.
+function BubbleTabBar({ state, navigation }: BottomTabBarProps) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const [open, setOpen] = useState(false);
+  const progress = useRef(new Animated.Value(0)).current;
+
+  const setOpenAnimated = (next: boolean) => {
+    setOpen(next);
+    Animated.spring(progress, {
+      toValue: next ? 1 : 0,
+      friction: 7,
+      tension: 90,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleOptionPress = (routeKey: string, routeName: string) => {
+    setOpenAnimated(false);
+    const event = navigation.emit({
+      type: "tabPress",
+      target: routeKey,
+      canPreventDefault: true,
+    });
+    if (!event.defaultPrevented) {
+      navigation.navigate(routeName);
+    }
+  };
+
+  const activeRoute = state.routes[state.index];
+  const ActiveIcon = TAB_META[activeRoute.name]?.icon ?? House;
 
   return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      {open && (
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => setOpenAnimated(false)}
+          accessibilityLabel="Cerrar navegación"
+        />
+      )}
+      <View
+        pointerEvents="box-none"
+        style={[styles.dock, { bottom: Math.max(insets.bottom, 16) + 16 }]}
+      >
+        <View
+          pointerEvents={open ? "auto" : "none"}
+          style={styles.options}
+        >
+          {state.routes.map((route, index) => {
+            const meta = TAB_META[route.name];
+            if (!meta) return null;
+            const focused = state.index === index;
+            const Icon = meta.icon;
+            // Closed state tucks each option toward the main bubble.
+            const shift = (state.routes.length - index) * 18;
+            return (
+              <Animated.View
+                key={route.key}
+                style={{
+                  opacity: progress,
+                  transform: [
+                    {
+                      translateX: progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [shift, 0],
+                      }),
+                    },
+                    {
+                      scale: progress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.6, 1],
+                      }),
+                    },
+                  ],
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => handleOptionPress(route.key, route.name)}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={meta.label}
+                  accessibilityState={{ selected: focused }}
+                  style={[
+                    styles.optionBubble,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                >
+                  {/* Tint layered over the solid surface so the bubble
+                      never lets the screen content show through. */}
+                  {focused && (
+                    <View
+                      pointerEvents="none"
+                      style={[
+                        StyleSheet.absoluteFill,
+                        {
+                          borderRadius: 28,
+                          backgroundColor: withAlpha(colors.tint, 0.14),
+                        },
+                      ]}
+                    />
+                  )}
+                  <Icon
+                    size={22}
+                    color={focused ? colors.tint : colors.textMuted}
+                    strokeWidth={focused ? 2.3 : 1.8}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
+        </View>
+        <TouchableOpacity
+          onPress={() => setOpenAnimated(!open)}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={open ? "Cerrar navegación" : "Abrir navegación"}
+          accessibilityState={{ expanded: open }}
+          style={[
+            styles.mainBubble,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          {open ? (
+            <X size={24} color={colors.textMuted} strokeWidth={2.2} />
+          ) : (
+            <ActiveIcon size={24} color={colors.tint} strokeWidth={2.3} />
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+export default function TabLayout() {
+  return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: colors.tint,
-        tabBarInactiveTintColor: colors.icon,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderTopColor: "transparent",
-          borderTopWidth: 0,
-          height: Platform.OS === "ios" ? 88 : 70,
-          paddingBottom: Platform.OS === "ios" ? 20 : 8,
-          paddingTop: 8,
-          paddingHorizontal: 16,
-          boxShadow: "0px -4px 12px rgba(0, 0, 0, 0.1)",
-          elevation: 12,
-          borderRadius: 24,
-          marginHorizontal: 16,
-          marginBottom: Platform.OS === "ios" ? 16 : 24,
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-        },
-        tabBarLabelStyle: {
-          display: "none", // Hide labels
-        },
-        tabBarItemStyle: {
-          paddingVertical: 4,
-        },
-        tabBarIconStyle: {
-          marginTop: 4,
-        },
-      }}
+      tabBar={(props) => <BubbleTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "home" : "home-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "compass" : "compass-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
+      <Tabs.Screen name="home" options={{ title: "Inicio" }} />
+      <Tabs.Screen name="explore" options={{ title: "Explorar" }} />
+      <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  dock: {
+    position: "absolute",
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  options: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  optionBubble: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0px 6px 18px rgba(15, 23, 42, 0.14)",
+    elevation: 8,
+  },
+  mainBubble: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0px 8px 24px rgba(15, 23, 42, 0.18)",
+    elevation: 10,
+  },
+});

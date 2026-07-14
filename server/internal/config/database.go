@@ -81,17 +81,7 @@ func seedUniversities(db *gorm.DB) {
 		return
 	}
 
-	defaultTheme := core.Theme{
-		Light: core.ThemeMode{Background: "#ffffff", Primary: "#0a7ea4"},
-		Dark:  core.ThemeMode{Background: "#0f172a", Primary: "#38bdf8"},
-	}
-
-	universities := []core.University{
-		{Name: "Universidad de la República (UdelaR)", State: true, Theme: defaultTheme},
-		{Name: "Universidad ORT Uruguay", State: true, Theme: defaultTheme},
-		{Name: "Universidad Católica del Uruguay", State: true, Theme: defaultTheme},
-		{Name: "Universidad de Montevideo", State: true, Theme: defaultTheme},
-	}
+	universities := DefaultUniversities()
 
 	if err := db.Create(&universities).Error; err != nil {
 		log.Println("Could not create initial universities: ", err)

@@ -1,5 +1,6 @@
 import { applyDefaultTheme, applyThemedColors } from "@/constants/Colors";
 import { RegisterForm, UserLoginForm } from "@/core/User";
+import { setUserProfile } from "@/hooks/useUserProfile";
 import { storage } from "@/utils/storage";
 import { router } from "expo-router";
 import api from "@/utils/api";
@@ -17,10 +18,7 @@ export const authService = {
       if (response.data.token) {
         let theme = response.data.theme;
         await storage.setItem("token", response.data.token);
-        await storage.setItem(
-          "user_profile",
-          JSON.stringify(response.data.user),
-        );
+        await setUserProfile(response.data.user);
         await storage.setItem("theme", JSON.stringify(response.data.theme));
 
         applyThemedColors(theme.light, theme.dark);
@@ -66,6 +64,7 @@ export const authService = {
 
   async logout() {
     await storage.clear();
+    await setUserProfile(null);
     applyDefaultTheme();
     router.replace("/");
   },

@@ -1,23 +1,23 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
+import { useColors } from "@/hooks/useColors";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export function SkeletonEventCard() {
-  const colorScheme = useColorScheme();
-  const fadeAnim = useRef(new Animated.Value(0.3)).current;
+  const colors = useColors();
+  const fadeAnim = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(fadeAnim, {
           toValue: 0.7,
-          duration: 1000,
+          duration: 900,
           useNativeDriver: true,
         }),
         Animated.timing(fadeAnim, {
-          toValue: 0.3,
-          duration: 1000,
+          toValue: 0.35,
+          duration: 900,
           useNativeDriver: true,
         }),
       ]),
@@ -27,25 +27,24 @@ export function SkeletonEventCard() {
     return () => animation.stop();
   }, [fadeAnim]);
 
+  const bone = { backgroundColor: colors.surfaceMuted };
+
   return (
     <Animated.View
       style={[
         styles.container,
-        {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-          opacity: fadeAnim,
-        },
+        { borderColor: colors.border, opacity: fadeAnim },
       ]}
     >
-      <View style={styles.imageSkeleton} />
-      <View style={styles.content}>
-        <View style={styles.titleSkeleton} />
-        <View style={styles.descriptionSkeleton} />
-        <View style={styles.detailsRow}>
-          <View style={styles.detailSkeleton} />
-          <View style={styles.detailSkeleton} />
-        </View>
+      <View style={styles.topRow}>
+        <View style={[styles.emojiSkeleton, bone]} />
+        <View style={[styles.categorySkeleton, bone]} />
+      </View>
+      <View style={[styles.titleSkeleton, bone]} />
+      <View style={[styles.descriptionSkeleton, bone]} />
+      <View style={styles.detailsRow}>
+        <View style={[styles.detailSkeleton, bone]} />
+        <View style={[styles.detailSkeleton, bone]} />
       </View>
     </Animated.View>
   );
@@ -53,33 +52,39 @@ export function SkeletonEventCard() {
 
 const styles = StyleSheet.create({
   container: {
-    width: 280,
+    width: 264,
     borderRadius: 16,
-    borderWidth: 1,
-    marginRight: 16,
-    overflow: "hidden",
-  },
-  imageSkeleton: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#e2e8f0",
-  },
-  content: {
+    borderWidth: StyleSheet.hairlineWidth,
+    marginRight: 12,
     padding: 16,
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  emojiSkeleton: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+  },
+  categorySkeleton: {
+    width: 72,
+    height: 10,
+    borderRadius: 5,
   },
   titleSkeleton: {
     width: "80%",
     height: 16,
-    backgroundColor: "#e2e8f0",
     borderRadius: 8,
     marginBottom: 8,
   },
   descriptionSkeleton: {
     width: "100%",
     height: 12,
-    backgroundColor: "#e2e8f0",
     borderRadius: 6,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   detailsRow: {
     flexDirection: "row",
@@ -88,7 +93,6 @@ const styles = StyleSheet.create({
   detailSkeleton: {
     width: "40%",
     height: 10,
-    backgroundColor: "#e2e8f0",
     borderRadius: 5,
   },
 });

@@ -1,11 +1,23 @@
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import {
+  Bell,
+  BookOpen,
+  Bookmark,
+  Clock,
+  Code,
+  GraduationCap,
+  LucideIcon,
+  Mic,
+  PartyPopper,
+  SlidersHorizontal,
+  Trophy,
+  Users,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
+  Image,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -19,17 +31,29 @@ import {
   SkeletonEventCard,
   ThemedText,
 } from "@/components";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { withAlpha } from "@/constants/Colors";
+import { useColors } from "@/hooks/useColors";
 
 // Mock data for categories
-const categories = [
-  { id: 1, name: "Eventos", icon: "🎉", color: "#FF6B6B", count: 12 },
-  { id: 2, name: "Grupos de Estudio", icon: "📚", color: "#4ECDC4", count: 8 },
-  { id: 3, name: "Clubes", icon: "🏆", color: "#45B7D1", count: 15 },
-  { id: 4, name: "Tutorías", icon: "👨‍🏫", color: "#96CEB4", count: 6 },
-  { id: 5, name: "Hackathons", icon: "💻", color: "#FFEAA7", count: 3 },
-  { id: 6, name: "Conferencias", icon: "🎤", color: "#DDA0DD", count: 9 },
+const categories: {
+  id: number;
+  name: string;
+  icon: LucideIcon;
+  color: string;
+  count: number;
+}[] = [
+  { id: 1, name: "Eventos", icon: PartyPopper, color: "#f43f5e", count: 12 },
+  {
+    id: 2,
+    name: "Grupos de Estudio",
+    icon: BookOpen,
+    color: "#0ea5e9",
+    count: 8,
+  },
+  { id: 3, name: "Clubes", icon: Trophy, color: "#f59e0b", count: 15 },
+  { id: 4, name: "Tutorías", icon: GraduationCap, color: "#10b981", count: 6 },
+  { id: 5, name: "Hackathons", icon: Code, color: "#8b5cf6", count: 3 },
+  { id: 6, name: "Conferencias", icon: Mic, color: "#ec4899", count: 9 },
 ];
 
 // Mock data for trending events
@@ -42,7 +66,7 @@ const trendingEvents = [
     time: "9:00 AM",
     location: "Auditorio Principal",
     attendees: 156,
-    image: "💻",
+    image: "https://picsum.photos/seed/uw-event-1/480/240",
     category: "Hackathons",
   },
   {
@@ -53,7 +77,7 @@ const trendingEvents = [
     time: "2:00 PM",
     location: "Sala de Conferencias",
     attendees: 89,
-    image: "🤖",
+    image: "https://picsum.photos/seed/uw-event-2/480/240",
     category: "Conferencias",
   },
   {
@@ -64,7 +88,7 @@ const trendingEvents = [
     time: "6:00 PM",
     location: "Biblioteca Central",
     attendees: 23,
-    image: "📊",
+    image: "https://picsum.photos/seed/uw-event-3/480/240",
     category: "Grupos de Estudio",
   },
   {
@@ -75,7 +99,7 @@ const trendingEvents = [
     time: "7:00 PM",
     location: "Centro de Innovación",
     attendees: 67,
-    image: "🚀",
+    image: "https://picsum.photos/seed/uw-event-4/480/240",
     category: "Clubes",
   },
 ];
@@ -88,7 +112,7 @@ const studyGroups = [
     members: 12,
     subject: "Desarrollo Web",
     nextSession: "Mañana 3:00 PM",
-    avatar: "⚛️",
+    avatar: "https://picsum.photos/seed/uw-group-1/96/96",
   },
   {
     id: 2,
@@ -96,7 +120,7 @@ const studyGroups = [
     members: 8,
     subject: "Matemáticas",
     nextSession: "Hoy 5:00 PM",
-    avatar: "📐",
+    avatar: "https://picsum.photos/seed/uw-group-2/96/96",
   },
   {
     id: 3,
@@ -104,7 +128,7 @@ const studyGroups = [
     members: 15,
     subject: "Física",
     nextSession: "Viernes 2:00 PM",
-    avatar: "⚛️",
+    avatar: "https://picsum.photos/seed/uw-group-3/96/96",
   },
   {
     id: 4,
@@ -112,7 +136,7 @@ const studyGroups = [
     members: 6,
     subject: "Arte",
     nextSession: "Lunes 4:00 PM",
-    avatar: "🎨",
+    avatar: "https://picsum.photos/seed/uw-group-4/96/96",
   },
 ];
 
@@ -129,13 +153,11 @@ export default function ExploreScreen() {
   });
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
-  // useEffect que se ejecuta cada vez que cambia searchQuery
+  // Runs on every change of searchQuery
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      // Si no hay búsqueda, limpiar resultados
       setSearchResults({
         Users: [],
         Events: [],
@@ -144,18 +166,15 @@ export default function ExploreScreen() {
       setIsSearching(false);
       setIsLoading(false);
     } else {
-      // Aquí puedes implementar tu lógica de búsqueda
-      console.log("Buscando:", searchQuery);
       setIsSearching(true);
       setIsLoading(true);
 
-      // Simular delay de carga (reemplaza esto con tu API call)
+      // Simulated loading delay (replace with the real API call)
       setTimeout(() => {
         const query = searchQuery.toLowerCase();
 
-        // Simular respuesta del backend
         const mockResults = {
-          Users: [], // Aquí irían los usuarios que coincidan
+          Users: [],
           Events: trendingEvents.filter(
             (event) =>
               event.title.toLowerCase().includes(query) ||
@@ -171,7 +190,7 @@ export default function ExploreScreen() {
 
         setSearchResults(mockResults);
         setIsLoading(false);
-      }, 1500); // Simular 1.5 segundos de carga
+      }, 1500);
     }
   }, [searchQuery]);
 
@@ -187,285 +206,261 @@ export default function ExploreScreen() {
     console.log("Study group pressed:", group.name);
   };
 
-  const handleSearchClear = () => {
-    setSearchQuery("");
-  };
+  const SectionHeader = ({
+    label,
+    showSeeAll,
+  }: {
+    label: string;
+    showSeeAll?: boolean;
+  }) => (
+    <View style={styles.sectionHeader}>
+      <ThemedText style={[styles.sectionLabel, { color: colors.textMuted }]}>
+        {label}
+      </ThemedText>
+      {showSeeAll && (
+        <TouchableOpacity>
+          <ThemedText style={[styles.seeAllText, { color: colors.tint }]}>
+            Ver todos
+          </ThemedText>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colorScheme === "dark" ? "#0f172a" : "#f8fafc" },
-      ]}
-    >
-      <LinearGradient
-        colors={
-          colorScheme === "dark"
-            ? ["#0f172a", "#1e293b"]
-            : ["#f8fafc", "#ffffff"]
-        }
-        style={styles.gradient}
-      >
-        <SafeAreaView
-          style={styles.safeArea}
-          edges={["bottom", "left", "right"]}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <ThemedText style={[styles.headerTitle, { color: colors.text }]}>
-                Explorar
-              </ThemedText>
-              <ThemedText
-                style={[styles.headerSubtitle, { color: colors.icon }]}
-              >
-                Descubre actividades y grupos
-              </ThemedText>
-            </View>
-            <View style={styles.headerRight}>
-              <TouchableOpacity style={styles.headerButton}>
-                <Ionicons
-                  name="notifications-outline"
-                  size={24}
-                  color={colors.icon}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.headerButton}>
-                <Ionicons name="filter-outline" size={24} color={colors.icon} />
-              </TouchableOpacity>
-            </View>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <ThemedText style={[styles.headerTitle, { color: colors.text }]}>
+              Explorar
+            </ThemedText>
+            <ThemedText
+              style={[styles.headerSubtitle, { color: colors.textMuted }]}
+            >
+              Descubre actividades y grupos
+            </ThemedText>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+              accessibilityLabel="Notificaciones"
+            >
+              <Bell size={20} color={colors.textMuted} strokeWidth={2} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+              accessibilityLabel="Filtros"
+            >
+              <SlidersHorizontal
+                size={20}
+                color={colors.textMuted}
+                strokeWidth={2}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {/* Search */}
+          <View style={styles.searchSection}>
+            <SearchBar
+              placeholder="Buscar eventos, grupos..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onClear={() => setSearchQuery("")}
+            />
           </View>
 
-          <ScrollView
-            style={styles.content}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Search Bar */}
-            <View style={styles.searchSection}>
-              <SearchBar
-                placeholder="Buscar eventos, grupos..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onClear={handleSearchClear}
-                style={styles.searchBar}
+          {/* Categories */}
+          <View style={styles.section}>
+            <SectionHeader label="CATEGORÍAS" />
+            {isLoading ? (
+              <FlatList
+                data={[1, 2, 3, 4, 5, 6]}
+                renderItem={() => <SkeletonCard />}
+                keyExtractor={(item) => item.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
               />
-            </View>
+            ) : (
+              <FlatList
+                data={categories}
+                renderItem={({ item }) => (
+                  <CategoryCard
+                    name={item.name}
+                    icon={item.icon}
+                    color={item.color}
+                    count={item.count}
+                    onPress={() => handleCategoryPress(item)}
+                  />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            )}
+          </View>
 
-            {/* Categories Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <ThemedText
-                  style={[styles.sectionTitle, { color: colors.text }]}
-                >
-                  Categorías
-                </ThemedText>
-              </View>
-              {isLoading ? (
-                <FlatList
-                  data={[1, 2, 3, 4, 5, 6]}
-                  renderItem={() => <SkeletonCard />}
-                  keyExtractor={(item) => item.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.categoriesList}
-                />
-              ) : (
-                <FlatList
-                  data={categories}
-                  renderItem={({ item }) => (
-                    <CategoryCard
-                      name={item.name}
-                      icon={item.icon}
-                      color={item.color}
-                      count={item.count}
-                      onPress={() => handleCategoryPress(item)}
-                    />
-                  )}
-                  keyExtractor={(item) => item.id.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.categoriesList}
-                />
-              )}
-            </View>
+          {/* Trending events */}
+          <View style={styles.section}>
+            <SectionHeader label="EVENTOS DESTACADOS" showSeeAll />
+            {isLoading ? (
+              <FlatList
+                data={[1, 2, 3, 4]}
+                renderItem={() => <SkeletonEventCard />}
+                keyExtractor={(item) => item.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            ) : (
+              <FlatList
+                data={isSearching ? searchResults.Events : trendingEvents}
+                renderItem={({ item }) => (
+                  <EventCard
+                    title={item.title}
+                    description={item.description}
+                    date={item.date}
+                    time={item.time}
+                    location={item.location}
+                    attendees={item.attendees}
+                    image={item.image}
+                    category={item.category}
+                    onPress={() => handleEventPress(item)}
+                  />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            )}
+          </View>
 
-            {/* Trending Events Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <ThemedText
-                  style={[styles.sectionTitle, { color: colors.text }]}
-                >
-                  Eventos Destacados
-                </ThemedText>
-                <TouchableOpacity>
-                  <ThemedText
-                    style={[styles.seeAllText, { color: colors.tint }]}
+          {/* Study groups */}
+          <View style={styles.section}>
+            <SectionHeader label="GRUPOS DE ESTUDIO" showSeeAll />
+            {isLoading ? (
+              <FlatList
+                data={[1, 2, 3, 4]}
+                renderItem={() => <SkeletonCard width={240} height={120} />}
+                keyExtractor={(item) => item.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            ) : (
+              <FlatList
+                data={isSearching ? searchResults.Groups : studyGroups}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.studyGroupCard,
+                      { borderColor: colors.border },
+                    ]}
+                    onPress={() => handleStudyGroupPress(item)}
+                    activeOpacity={0.8}
                   >
-                    Ver todos
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-              {isLoading ? (
-                <FlatList
-                  data={[1, 2, 3, 4]}
-                  renderItem={() => <SkeletonEventCard />}
-                  keyExtractor={(item) => item.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.eventsList}
-                />
-              ) : (
-                <FlatList
-                  data={isSearching ? searchResults.Events : trendingEvents}
-                  renderItem={({ item }) => (
-                    <EventCard
-                      title={item.title}
-                      description={item.description}
-                      date={item.date}
-                      time={item.time}
-                      location={item.location}
-                      attendees={item.attendees}
-                      image={item.image}
-                      category={item.category}
-                      onPress={() => handleEventPress(item)}
-                    />
-                  )}
-                  keyExtractor={(item) => item.id.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.eventsList}
-                />
-              )}
-            </View>
-
-            {/* Study Groups Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <ThemedText
-                  style={[styles.sectionTitle, { color: colors.text }]}
-                >
-                  Grupos de Estudio
-                </ThemedText>
-                <TouchableOpacity>
-                  <ThemedText
-                    style={[styles.seeAllText, { color: colors.tint }]}
-                  >
-                    Ver todos
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-              {isLoading ? (
-                <FlatList
-                  data={[1, 2, 3, 4]}
-                  renderItem={() => <SkeletonCard width={240} height={120} />}
-                  keyExtractor={(item) => item.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.studyGroupsList}
-                />
-              ) : (
-                <FlatList
-                  data={isSearching ? searchResults.Groups : studyGroups}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={[
-                        styles.studyGroupCard,
-                        {
-                          backgroundColor:
-                            colorScheme === "dark" ? "#1e293b" : "#ffffff",
-                          borderColor:
-                            colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                        },
-                      ]}
-                      onPress={() => handleStudyGroupPress(item)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.studyGroupHeader}>
-                        <Text style={styles.studyGroupAvatar}>
-                          {item.avatar}
-                        </Text>
-                        <View style={styles.studyGroupInfo}>
-                          <ThemedText
-                            style={[
-                              styles.studyGroupName,
-                              { color: colors.text },
-                            ]}
-                          >
-                            {item.name}
-                          </ThemedText>
-                          <ThemedText
-                            style={[
-                              styles.studyGroupSubject,
-                              { color: colors.icon },
-                            ]}
-                          >
-                            {item.subject}
+                    <View style={styles.studyGroupHeader}>
+                      {item.avatar?.startsWith("http") ? (
+                        <Image
+                          source={{ uri: item.avatar }}
+                          style={styles.studyGroupAvatar}
+                        />
+                      ) : (
+                        <View
+                          style={[
+                            styles.studyGroupAvatar,
+                            styles.studyGroupAvatarFallback,
+                            { backgroundColor: withAlpha(colors.tint, 0.1) },
+                          ]}
+                        >
+                          <ThemedText style={styles.studyGroupAvatarText}>
+                            {item.avatar}
                           </ThemedText>
                         </View>
-                        <TouchableOpacity style={styles.bookmarkButton}>
-                          <Ionicons
-                            name="bookmark-outline"
-                            size={20}
-                            color={colors.icon}
-                          />
-                        </TouchableOpacity>
+                      )}
+                      <View style={styles.studyGroupInfo}>
+                        <ThemedText
+                          style={[styles.studyGroupName, { color: colors.text }]}
+                          numberOfLines={1}
+                        >
+                          {item.name}
+                        </ThemedText>
+                        <ThemedText
+                          style={[
+                            styles.studyGroupSubject,
+                            { color: colors.textMuted },
+                          ]}
+                        >
+                          {item.subject}
+                        </ThemedText>
                       </View>
-                      <View style={styles.studyGroupDetails}>
-                        <View style={styles.studyGroupDetail}>
-                          <Ionicons
-                            name="people-outline"
-                            size={16}
-                            color={colors.icon}
-                          />
-                          <ThemedText
-                            style={[
-                              styles.studyGroupDetailText,
-                              { color: colors.icon },
-                            ]}
-                          >
-                            {item.members} miembros
-                          </ThemedText>
-                        </View>
-                        <View style={styles.studyGroupDetail}>
-                          <Ionicons
-                            name="time-outline"
-                            size={16}
-                            color={colors.icon}
-                          />
-                          <ThemedText
-                            style={[
-                              styles.studyGroupDetailText,
-                              { color: colors.icon },
-                            ]}
-                          >
-                            {item.nextSession}
-                          </ThemedText>
-                        </View>
+                      <TouchableOpacity
+                        style={styles.bookmarkButton}
+                        accessibilityLabel="Guardar grupo"
+                      >
+                        <Bookmark
+                          size={18}
+                          color={colors.textMuted}
+                          strokeWidth={2}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.studyGroupDetails}>
+                      <View style={styles.studyGroupDetail}>
+                        <Users size={14} color={colors.tint} strokeWidth={2} />
+                        <ThemedText
+                          style={[
+                            styles.studyGroupDetailText,
+                            { color: colors.textMuted },
+                          ]}
+                        >
+                          {item.members} miembros
+                        </ThemedText>
                       </View>
-                    </TouchableOpacity>
-                  )}
-                  keyExtractor={(item) => item.id.toString()}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.studyGroupsList}
-                />
-              )}
-            </View>
+                      <View style={styles.studyGroupDetail}>
+                        <Clock size={14} color={colors.tint} strokeWidth={2} />
+                        <ThemedText
+                          style={[
+                            styles.studyGroupDetailText,
+                            { color: colors.textMuted },
+                          ]}
+                        >
+                          {item.nextSession}
+                        </ThemedText>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalList}
+              />
+            )}
+          </View>
 
-            {/* Bottom padding for floating tab bar */}
-            <View style={styles.bottomPadding} />
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
+          {/* Bottom padding for the floating tab bar */}
+          <View style={styles.bottomPadding} />
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  gradient: {
     flex: 1,
   },
   safeArea: {
@@ -476,74 +471,68 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    marginTop: 50,
+    paddingTop: 12,
+    paddingBottom: 14,
   },
   headerLeft: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: -0.5,
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: -0.8,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     marginTop: 2,
   },
   headerRight: {
     flexDirection: "row",
-    gap: 16,
+    gap: 10,
   },
   headerButton: {
-    padding: 8,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: {
     flex: 1,
   },
   searchSection: {
     paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  searchBar: {
-    marginBottom: 0,
+    marginBottom: 28,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 30,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 14,
     paddingHorizontal: 20,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.4,
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
-  categoriesList: {
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  eventsList: {
-    paddingHorizontal: 20,
-  },
-  studyGroupsList: {
+  horizontalList: {
     paddingHorizontal: 20,
   },
   studyGroupCard: {
     width: 240,
     borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    marginRight: 16,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-    elevation: 2,
+    padding: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginRight: 12,
   },
   studyGroupHeader: {
     flexDirection: "row",
@@ -551,35 +540,45 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   studyGroupAvatar: {
-    fontSize: 32,
-    marginRight: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 10,
+  },
+  studyGroupAvatarFallback: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  studyGroupAvatarText: {
+    fontSize: 22,
   },
   studyGroupInfo: {
     flex: 1,
   },
   studyGroupName: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
+    fontSize: 14.5,
+    fontWeight: "700",
+    marginBottom: 2,
   },
   studyGroupSubject: {
-    fontSize: 14,
+    fontSize: 12.5,
   },
   bookmarkButton: {
     padding: 4,
   },
   studyGroupDetails: {
-    gap: 8,
+    gap: 7,
   },
   studyGroupDetail: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 7,
   },
   studyGroupDetailText: {
     fontSize: 12,
+    fontWeight: "500",
   },
   bottomPadding: {
-    height: 120,
+    height: 130,
   },
 });

@@ -1,50 +1,52 @@
 {
-	"expo": {
-		"name": "mobile",
-		"slug": "mobile",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/images/uniwave-logo-graduacion-1024px.png",
-		"scheme": "mobile",
-		"userInterfaceStyle": "automatic",
-		"newArchEnabled": true,
-		"ios": {
-			"supportsTablet": true
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/images/uniwave-logo-graduacion-512px.png",
-				"backgroundColor": "#ffffff"
-			},
-			"edgeToEdgeEnabled": true,
-			"package": "com.uniwave.mobile"
-		},
-		"web": {
-			"bundler": "metro",
-			"output": "static",
-			"favicon": "./assets/images/uniwave-logo-graduacion-256px.png"
-		},
-		"plugins": [
-			"expo-router",
-			[
-				"expo-splash-screen",
-				{
-					"image": "./assets/images/uniwave-logo-graduacion-256px.png",
-					"imageWidth": 200,
-					"resizeMode": "contain",
-					"backgroundColor": "#ffffff"
-				}
-			]
-		],
-		"experiments": {
-			"typedRoutes": true
-		},
-		"extra": {
-			"apiUrl": "http://192.168.68.240:8080",
-			"router": {},
-			"eas": {
-				"projectId": "d3a8ab7e-19b7-47c6-b6a4-11e8a4d7f9dc"
-			}
-		}
-	}
+  "expo": {
+    "name": "mobile",
+    "slug": "mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/uniwave-logo-graduacion-1024px.png",
+    "scheme": "mobile",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/uniwave-logo-graduacion-512px.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.uniwave.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/uniwave-logo-graduacion-256px.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/uniwave-logo-graduacion-256px.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d3a8ab7e-19b7-47c6-b6a4-11e8a4d7f9dc"
+      }
+    }
+  }
 }

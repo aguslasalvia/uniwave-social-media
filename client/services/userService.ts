@@ -1,4 +1,5 @@
 import { UserProfile } from "@/core/User";
+import { setUserProfile } from "@/hooks/useUserProfile";
 import api from "@/utils/api";
 import { storage } from "@/utils/storage";
 
@@ -31,9 +32,9 @@ export const userService = {
         return null;
       }
       // Prefer the server's representation of the user, falling back to the form.
-      const updated = response.data?.user ?? updateForm;
-      await storage.setItem("user_profile", JSON.stringify(updated));
-      return updated as UserProfile;
+      const updated = (response.data?.user ?? updateForm) as UserProfile;
+      await setUserProfile(updated);
+      return updated;
     } catch {
       return null;
     }
@@ -66,10 +67,7 @@ export const userService = {
 
       if (response.status === 200) {
         if (response.data?.user) {
-          await storage.setItem(
-            "user_profile",
-            JSON.stringify(response.data.user),
-          );
+          await setUserProfile(response.data.user);
         }
         return response.data?.avatar ?? null;
       }

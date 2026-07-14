@@ -1,11 +1,18 @@
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Bookmark,
+  Ellipsis,
+  Heart,
+  MessageCircle,
+  Share2,
+} from "lucide-react-native";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
+import { withAlpha } from "@/constants/Colors";
 import { PostAuthor } from "@/core/Post";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColors } from "@/hooks/useColors";
+import { timeAgo } from "@/utils/time";
 
 interface PostCardProps {
   user?: PostAuthor;
@@ -14,6 +21,7 @@ interface PostCardProps {
   comments?: number;
   likedByMe?: boolean;
   image?: string[];
+  createdAt?: number;
   onPress?: () => void;
   onLike?: () => void;
   onComment?: () => void;
@@ -27,13 +35,13 @@ export function PostCard({
   comments,
   likedByMe = false,
   image,
+  createdAt,
   onPress,
   onLike,
   onComment,
   onShare,
 }: PostCardProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   const likesCount = likes?.length ?? 0;
   const commentsCount = comments ?? 0;
@@ -42,100 +50,117 @@ export function PostCard({
 
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-        },
-      ]}
+      style={styles.container}
       onPress={onPress}
-      activeOpacity={0.9}
+      activeOpacity={0.8}
     >
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.userInfo}>
-          <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
-            {user?.avatar ? (
-              <Image
-                source={{ uri: user.avatar }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <ThemedText style={styles.avatarText}>
-                {displayName.charAt(0).toUpperCase()}
+        <View
+          style={[
+            styles.avatar,
+            { backgroundColor: withAlpha(colors.tint, 0.14) },
+          ]}
+        >
+          {user?.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+          ) : (
+            <ThemedText style={[styles.avatarText, { color: colors.tint }]}>
+              {displayName.charAt(0).toUpperCase()}
+            </ThemedText>
+          )}
+        </View>
+        <View style={styles.userDetails}>
+          <View style={styles.nameRow}>
+            <ThemedText
+              style={[styles.userName, { color: colors.text }]}
+              numberOfLines={1}
+            >
+              {displayName}
+            </ThemedText>
+            {createdAt != null && (
+              <ThemedText style={[styles.timestamp, { color: colors.textMuted }]}>
+                · {timeAgo(createdAt)}
               </ThemedText>
             )}
           </View>
-          <View style={styles.userDetails}>
-            <ThemedText style={[styles.userName, { color: colors.text }]}>
-              {displayName}
+          {!!user?.university && (
+            <ThemedText
+              style={[styles.university, { color: colors.textMuted }]}
+              numberOfLines={1}
+            >
+              {user.university}
             </ThemedText>
-            {!!user?.university && (
-              <View style={styles.universityBadge}>
-                <ThemedText style={styles.universityText}>
-                  {user.university}
-                </ThemedText>
-              </View>
-            )}
-          </View>
+          )}
         </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.moreButton}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={16}
-              color={colors.icon}
-            />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.moreButton}>
+          <Ellipsis size={18} color={colors.textMuted} strokeWidth={2} />
+        </TouchableOpacity>
       </View>
 
       {/* Content */}
-      <View style={styles.contentContainer}>
-        <ThemedText style={[styles.content, { color: colors.text }]}>
-          {content}
-        </ThemedText>
+      <ThemedText style={[styles.content, { color: colors.text }]}>
+        {content}
+      </ThemedText>
 
-        {/* Image */}
-        {firstImage && (
-          <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: firstImage }}
-              style={styles.postImage}
-              resizeMode="cover"
-            />
-          </View>
-        )}
+      {firstImage && (
+        <Image
+          source={{ uri: firstImage }}
+          style={[styles.postImage, { borderColor: colors.border }]}
+          resizeMode="cover"
+        />
+      )}
 
-        {/* Action buttons */}
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={onLike}>
-            <Ionicons
-              name={likedByMe ? "heart" : "heart-outline"}
-              size={18}
-              color={likedByMe ? "#ef4444" : colors.icon}
-            />
-            <ThemedText style={[styles.actionText, { color: colors.icon }]}>
-              {likesCount}
-            </ThemedText>
-          </TouchableOpacity>
+      {/* Actions */}
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onLike}
+          accessibilityLabel={likedByMe ? "Quitar me gusta" : "Me gusta"}
+        >
+          <Heart
+            size={19}
+            color={likedByMe ? colors.danger : colors.textMuted}
+            fill={likedByMe ? colors.danger : "none"}
+            strokeWidth={1.8}
+          />
+          <ThemedText
+            style={[
+              styles.actionText,
+              { color: likedByMe ? colors.danger : colors.textMuted },
+            ]}
+          >
+            {likesCount}
+          </ThemedText>
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} onPress={onComment}>
-            <Ionicons name="chatbubble-outline" size={18} color={colors.icon} />
-            <ThemedText style={[styles.actionText, { color: colors.icon }]}>
-              {commentsCount}
-            </ThemedText>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onComment}
+          accessibilityLabel="Comentar"
+        >
+          <MessageCircle size={19} color={colors.textMuted} strokeWidth={1.8} />
+          <ThemedText style={[styles.actionText, { color: colors.textMuted }]}>
+            {commentsCount}
+          </ThemedText>
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} onPress={onShare}>
-            <Ionicons name="share-outline" size={18} color={colors.icon} />
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={onShare}
+          accessibilityLabel="Compartir"
+        >
+          <Share2 size={19} color={colors.textMuted} strokeWidth={1.8} />
+        </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="bookmark-outline" size={18} color={colors.icon} />
-          </TouchableOpacity>
-        </View>
+        <View style={styles.actionsSpacer} />
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          accessibilityLabel="Guardar"
+        >
+          <Bookmark size={19} color={colors.textMuted} strokeWidth={1.8} />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -143,24 +168,12 @@ export function PostCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 16,
-    overflow: "hidden",
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-    elevation: 2,
+    paddingVertical: 16,
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
-    paddingBottom: 12,
-  },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
+    marginBottom: 10,
   },
   avatar: {
     width: 40,
@@ -168,12 +181,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 11,
   },
   avatarText: {
-    fontSize: 18,
-    color: "#ffffff",
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "800",
   },
   avatarImage: {
     width: 40,
@@ -182,71 +194,57 @@ const styles = StyleSheet.create({
   },
   userDetails: {
     flex: 1,
+    gap: 1,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 5,
   },
   userName: {
     fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 2,
+    fontWeight: "700",
+    flexShrink: 1,
   },
-  universityBadge: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    alignSelf: "flex-start",
+  timestamp: {
+    fontSize: 13,
   },
-  universityText: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "#3b82f6",
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: "400",
+  university: {
+    fontSize: 12.5,
   },
   moreButton: {
-    padding: 4,
-  },
-  contentContainer: {
-    padding: 16,
-    paddingTop: 0,
+    padding: 6,
+    marginLeft: 6,
   },
   content: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  imageContainer: {
-    marginBottom: 12,
-    borderRadius: 8,
-    overflow: "hidden",
+    fontSize: 15,
+    lineHeight: 22,
   },
   postImage: {
     width: "100%",
-    height: 180,
-    borderRadius: 8,
+    height: 210,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginTop: 12,
   },
-  actionsContainer: {
+  actions: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0, 0, 0, 0.05)",
+    alignItems: "center",
+    marginTop: 6,
+    marginLeft: -10,
   },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 5,
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
+  },
+  actionsSpacer: {
+    flex: 1,
   },
   actionText: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

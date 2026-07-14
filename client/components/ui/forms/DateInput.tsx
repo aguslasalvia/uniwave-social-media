@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { CalendarDays, ChevronDown, LucideIcon } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Platform,
@@ -7,16 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { useColors } from "@/hooks/useColors";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface DateInputProps {
   placeholder?: string;
   value: string;
   onChangeText: (value: string) => void;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: LucideIcon;
   style?: any;
   maximumDate?: Date;
   minimumDate?: Date;
@@ -37,7 +36,7 @@ export function DateInput({
   placeholder = "Seleccionar fecha",
   value,
   onChangeText,
-  icon = "calendar",
+  icon: Icon = CalendarDays,
   style,
   maximumDate = new Date(),
   minimumDate = new Date(1900, 0, 1),
@@ -48,32 +47,26 @@ export function DateInput({
   theme,
 }: DateInputProps) {
   const [showPicker, setShowPicker] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   const customTheme = {
-    backgroundColor:
-      theme?.backgroundColor ||
-      (colorScheme === "dark" ? "#1e293b" : "#f8fafc"),
+    backgroundColor: theme?.backgroundColor || colors.surface,
     textColor: theme?.textColor || colors.text,
     accentColor: theme?.accentColor || colors.tint,
-    borderColor:
-      theme?.borderColor || (colorScheme === "dark" ? "#334155" : "#e2e8f0"),
-    placeholderColor: theme?.placeholderColor || colors.icon,
+    borderColor: theme?.borderColor || colors.border,
+    placeholderColor: theme?.placeholderColor || colors.textMuted,
   };
 
-  // Convertir string a Date para el picker
+  // Convert the YYYY-MM-DD string to a local Date for the picker,
+  // avoiding UTC offset issues.
   const getDateValue = () => {
     if (!value) return new Date();
-    // Crear la fecha en la zona horaria local para evitar problemas de UTC
     const [year, month, day] = value.split("-").map(Number);
-    return new Date(year, month - 1, day); // month - 1 porque los meses van de 0-11
+    return new Date(year, month - 1, day);
   };
 
-  // Formatear fecha para mostrar
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return "";
-    // Crear la fecha en la zona horaria local
     const [year, month, day] = dateString.split("-").map(Number);
     const date = new Date(year, month - 1, day);
     return date.toLocaleDateString(locale, {
@@ -90,14 +83,8 @@ export function DateInput({
       const year = selectedDate.getFullYear();
       const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const day = String(selectedDate.getDate()).padStart(2, "0");
-      const formattedDate = `${year}-${month}-${day}`;
-
-      onChangeText(formattedDate);
+      onChangeText(`${year}-${month}-${day}`);
     }
-  };
-
-  const showDatePicker = () => {
-    setShowPicker(true);
   };
 
   return (
@@ -110,36 +97,28 @@ export function DateInput({
             borderColor: customTheme.borderColor,
           },
         ]}
-        onPress={showDatePicker}
+        onPress={() => setShowPicker(true)}
         activeOpacity={0.7}
         disabled={disabled}
       >
-        <View style={styles.iconContainer}>
-          <Ionicons name={icon} size={20} color={customTheme.accentColor} />
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text
-            style={[
-              styles.text,
-              {
-                color: value
-                  ? customTheme.textColor
-                  : customTheme.placeholderColor,
-              },
-            ]}
-          >
-            {value ? formatDisplayDate(value) : placeholder}
-          </Text>
-        </View>
-
-        <View style={styles.arrowContainer}>
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color={customTheme.placeholderColor}
-          />
-        </View>
+        <Icon size={19} color={customTheme.accentColor} strokeWidth={2} />
+        <Text
+          style={[
+            styles.text,
+            {
+              color: value
+                ? customTheme.textColor
+                : customTheme.placeholderColor,
+            },
+          ]}
+        >
+          {value ? formatDisplayDate(value) : placeholder}
+        </Text>
+        <ChevronDown
+          size={17}
+          color={customTheme.placeholderColor}
+          strokeWidth={2}
+        />
       </TouchableOpacity>
 
       {showPicker && (
@@ -166,33 +145,15 @@ const styles = StyleSheet.create({
   input: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 12,
-    borderWidth: 1,
+    height: 54,
+    borderRadius: 14,
+    borderWidth: 1.5,
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    minHeight: 56,
-    overflow: "hidden",
-    // Sombras para iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    // Elevación para Android
-    elevation: 2,
-  },
-  iconContainer: {
-    marginRight: 12,
-    width: 24,
-    alignItems: "center",
-  },
-  textContainer: {
-    flex: 1,
+    gap: 12,
   },
   text: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 15,
     fontWeight: "500",
-  },
-  arrowContainer: {
-    marginLeft: 8,
   },
 });

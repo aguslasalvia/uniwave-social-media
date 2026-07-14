@@ -1,13 +1,14 @@
+import { LucideIcon } from "lucide-react-native";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { withAlpha } from "@/constants/Colors";
+import { useColors } from "@/hooks/useColors";
 
 interface CategoryCardProps {
   name: string;
-  icon: string;
+  icon: LucideIcon;
   color: string;
   count: number;
   onPress?: () => void;
@@ -15,75 +16,59 @@ interface CategoryCardProps {
 
 export function CategoryCard({
   name,
-  icon,
+  icon: Icon,
   color,
   count,
   onPress,
 }: CategoryCardProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-        },
-      ]}
+      style={styles.container}
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, { backgroundColor: color }]}>
-        <Text style={styles.iconText}>{icon}</Text>
+      <View
+        style={[styles.iconWell, { backgroundColor: withAlpha(color, 0.12) }]}
+      >
+        <Icon size={22} color={color} strokeWidth={1.8} />
       </View>
-      <View style={styles.content}>
-        <ThemedText style={[styles.name, { color: colors.text }]}>
-          {name}
-        </ThemedText>
-        <ThemedText style={[styles.count, { color: colors.icon }]}>
-          {count} actividades
-        </ThemedText>
-      </View>
+      <ThemedText
+        style={[styles.name, { color: colors.text }]}
+        numberOfLines={1}
+      >
+        {name}
+      </ThemedText>
+      <ThemedText style={[styles.count, { color: colors.textMuted }]}>
+        {count} actividades
+      </ThemedText>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginRight: 16,
-    width: 120,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-    elevation: 2,
+    marginRight: 18,
+    width: 96,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  iconWell: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
-  },
-  iconText: {
-    fontSize: 24,
-  },
-  content: {
-    alignItems: "center",
+    marginBottom: 8,
   },
   name: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: "center",
   },
   count: {
-    fontSize: 12,
+    fontSize: 11.5,
     textAlign: "center",
   },
 });

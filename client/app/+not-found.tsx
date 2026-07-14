@@ -1,8 +1,14 @@
 import { Link, Stack } from "expo-router";
+import { Waves } from "lucide-react-native";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { withAlpha } from "@/constants/Colors";
+import { useColors } from "@/hooks/useColors";
+
 export default function NotFoundScreen() {
+  const colors = useColors();
+
   return (
     <>
       <Stack.Screen
@@ -11,11 +17,23 @@ export default function NotFoundScreen() {
           headerShown: false,
         }}
       />
-      <View style={styles.container}>
-        <Text style={styles.title}>¡Ups! Página perdida</Text>
-        <Text style={styles.subtitle}>Esta página no existe</Text>
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Ir al inicio</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View
+          style={[
+            styles.iconWell,
+            { backgroundColor: withAlpha(colors.tint, 0.12) },
+          ]}
+        >
+          <Waves size={36} color={colors.tint} strokeWidth={2} />
+        </View>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Te alejaste de la ola
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          Esta página no existe
+        </Text>
+        <Link href="/" style={[styles.link, { backgroundColor: colors.tint }]}>
+          <Text style={styles.linkText}>Volver al inicio</Text>
         </Link>
       </View>
     </>
@@ -27,29 +45,35 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#ffffff",
+    padding: 24,
+  },
+  iconWell: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#000000",
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    marginBottom: 24,
-    color: "#666666",
+    fontSize: 15,
+    marginBottom: 28,
   },
   link: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 14,
+    overflow: "hidden",
   },
   linkText: {
     color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });

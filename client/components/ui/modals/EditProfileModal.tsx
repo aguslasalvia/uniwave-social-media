@@ -1,7 +1,15 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useEffect } from "react";
 import {
-  Alert,
+  AtSign,
+  GraduationCap,
+  LibraryBig,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  X,
+} from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
   Modal,
   ScrollView,
   StyleSheet,
@@ -9,17 +17,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { FormInput, SolidButton, DateInput } from "@/components";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+
+import { DateInput, FormInput } from "@/components/ui/forms";
+import { ToastHost, useToast } from "@/components/ui/toast";
 import { userService } from "@/services/userService";
-import { authService } from "@/services/authService";
-import { router } from "expo-router";
+import { useColors } from "@/hooks/useColors";
 
 interface EditProfileModalProps {
   visible: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
   initialData: {
     id: string;
     name: string;
@@ -27,7 +33,6 @@ interface EditProfileModalProps {
     email: string;
     phone: string;
     dateOfBirth: string;
-    // bio: string;
     university: string;
     career: string;
   };
@@ -36,11 +41,10 @@ interface EditProfileModalProps {
 export function EditProfileModal({
   visible,
   onClose,
-  onSave,
   initialData,
 }: EditProfileModalProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState({
     id: initialData.id,
@@ -52,14 +56,9 @@ export function EditProfileModal({
     confirmPassword: "",
     phone: initialData.phone,
     dateOfBirth: initialData.dateOfBirth,
-    // bio: initialData.bio,
     university: initialData.university,
     career: initialData.career,
   });
-
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     setForm({
@@ -72,7 +71,6 @@ export function EditProfileModal({
       confirmPassword: "",
       phone: initialData.phone,
       dateOfBirth: initialData.dateOfBirth,
-      // bio: initialData.bio,
       university: initialData.university,
       career: initialData.career,
     });
@@ -83,11 +81,6 @@ export function EditProfileModal({
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handleLogout = async () => {
-    await authService.logout();
-    onClose();
   };
 
   const handleSave = async () => {
@@ -114,15 +107,16 @@ export function EditProfileModal({
     const response = await userService.updateUserProfile(payload);
     if (response) {
       onClose();
-      Alert.alert("Usuario Actualizado Exitosamente");
+      showToast("Usuario actualizado exitosamente", "success");
     } else {
-      Alert.alert("No se a podido actializar\nPor favor reintente mas tarde");
+      showToast("No se pudo actualizar. Por favor reintenta más tarde", "error");
     }
   };
 
-  const currentYear = new Date().getFullYear();
-  const birthYears = Array.from({ length: 50 }, (_, i) =>
-    (currentYear - 50 + i).toString(),
+  const SectionLabel = ({ children }: { children: string }) => (
+    <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
+      {children}
+    </Text>
   );
 
   return (
@@ -132,19 +126,22 @@ export function EditProfileModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colorScheme === "dark" ? "#0f172a" : "#ffffff" },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {/* RN's Modal opens its own native layer, so the toast host at the
+            app root can't show through it — mount a local one here. */}
+        <ToastHost />
+
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.text} />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            accessibilityLabel="Cerrar"
+          >
+            <X size={22} color={colors.text} strokeWidth={2} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Editar Perfil
+            Editar perfil
           </Text>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
             <Text style={[styles.saveButtonText, { color: colors.tint }]}>
@@ -154,26 +151,15 @@ export function EditProfileModal({
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={{ paddingHorizontal: 20 }}>
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutText}>Cerrar Sesion</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Información Personal */}
+          {/* Personal info */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Información Personal
-            </Text>
+            <SectionLabel>INFORMACIÓN PERSONAL</SectionLabel>
 
             <FormInput
               placeholder="Nombre completo"
               value={form.name}
               onChangeText={(text) => updateForm("name", text)}
-              icon="person"
+              icon={User}
               style={styles.input}
             />
 
@@ -181,7 +167,7 @@ export function EditProfileModal({
               placeholder="Username"
               value={form.username}
               onChangeText={(text) => updateForm("username", text)}
-              icon="at"
+              icon={AtSign}
               style={styles.input}
             />
 
@@ -189,7 +175,7 @@ export function EditProfileModal({
               placeholder="Email"
               value={form.email}
               onChangeText={(text) => updateForm("email", text)}
-              icon="mail"
+              icon={Mail}
               keyboardType="email-address"
               style={styles.input}
             />
@@ -198,7 +184,7 @@ export function EditProfileModal({
               placeholder="Teléfono"
               value={form.phone}
               onChangeText={(text) => updateForm("phone", text)}
-              icon="call"
+              icon={Phone}
               keyboardType="phone-pad"
               style={styles.input}
             />
@@ -211,17 +197,15 @@ export function EditProfileModal({
             />
           </View>
 
-          {/* Información Académica */}
+          {/* Academic info */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Información Académica
-            </Text>
+            <SectionLabel>INFORMACIÓN ACADÉMICA</SectionLabel>
 
             <FormInput
               placeholder="Universidad"
               value={form.university}
               onChangeText={(text) => updateForm("university", text)}
-              icon="school"
+              icon={GraduationCap}
               style={styles.input}
             />
 
@@ -229,23 +213,21 @@ export function EditProfileModal({
               placeholder="Carrera"
               value={form.career}
               onChangeText={(text) => updateForm("career", text)}
-              icon="library"
+              icon={LibraryBig}
               style={styles.input}
             />
           </View>
 
-          {/* Contraseña */}
+          {/* Password */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Cambiar Contraseña
-            </Text>
+            <SectionLabel>CAMBIAR CONTRASEÑA</SectionLabel>
 
             <FormInput
               placeholder="Contraseña actual"
               value={form.currentPassword}
               onChangeText={(text) => updateForm("currentPassword", text)}
-              icon="lock-closed"
-              secureTextEntry={!showCurrentPassword}
+              icon={Lock}
+              secureTextEntry
               style={styles.input}
             />
 
@@ -253,8 +235,8 @@ export function EditProfileModal({
               placeholder="Nueva contraseña"
               value={form.password}
               onChangeText={(text) => updateForm("password", text)}
-              icon="lock-closed"
-              secureTextEntry={!showPassword}
+              icon={Lock}
+              secureTextEntry
               style={styles.input}
             />
 
@@ -262,51 +244,13 @@ export function EditProfileModal({
               placeholder="Confirmar nueva contraseña"
               value={form.confirmPassword}
               onChangeText={(text) => updateForm("confirmPassword", text)}
-              icon="lock-closed"
-              secureTextEntry={!showConfirmPassword}
+              icon={Lock}
+              secureTextEntry
               style={styles.input}
             />
           </View>
 
-          {/* Bio/Descripción */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Acerca de mí
-            </Text>
-
-            <View
-              style={[
-                styles.textAreaContainer,
-                {
-                  backgroundColor:
-                    colorScheme === "dark" ? "#1e293b" : "#ffffff",
-                  borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                },
-              ]}
-            >
-              {/* <Text style={[styles.textArea, { color: colors.text }]}>
-								{form.bio || 'Cuéntanos sobre ti, tus intereses académicos, proyectos...'}
-							</Text> */}
-            </View>
-          </View>
-
-          {/* Botones de acción */}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.cancelButton, { borderColor: colors.icon }]}
-              onPress={onClose}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-
-            <SolidButton
-              title="Guardar Cambios"
-              onPress={handleSave}
-              style={styles.saveChangesButton}
-            />
-          </View>
+          <View style={styles.bottomPadding} />
         </ScrollView>
       </View>
     </Modal>
@@ -321,24 +265,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.1)",
   },
   closeButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
   },
   saveButton: {
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   saveButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -347,58 +291,16 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 24,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 16,
+  sectionLabel: {
+    fontSize: 11.5,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginBottom: 12,
   },
   input: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  textAreaContainer: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    minHeight: 120,
-  },
-  textArea: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  actions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 32,
-    marginBottom: 40,
-  },
-  cancelButton: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  saveChangesButton: {
-    flex: 1,
-  },
-  logoutButton: {
-    marginTop: 20,
-    flex: 1,
-    height: 44,
-    borderWidth: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    borderColor: "red",
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "red",
+  bottomPadding: {
+    height: 40,
   },
 });

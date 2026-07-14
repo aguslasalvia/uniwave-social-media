@@ -1,9 +1,8 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import { Search, X } from "lucide-react-native";
+import React, { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { useColors } from "@/hooks/useColors";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -20,38 +19,43 @@ export function SearchBar({
   onClear,
   style,
 }: SearchBarProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const [focused, setFocused] = useState(false);
+  const colors = useColors();
 
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: colorScheme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
+          backgroundColor: colors.surface,
+          borderColor: focused ? colors.tint : colors.border,
         },
         style,
       ]}
     >
-      <Ionicons
-        name="search"
-        size={20}
-        color={colors.icon}
-        style={styles.searchIcon}
+      <Search
+        size={19}
+        color={focused ? colors.tint : colors.textMuted}
+        strokeWidth={2}
       />
       <TextInput
         style={[styles.input, { color: colors.text }]}
         placeholder={placeholder}
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.textMuted}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         autoCapitalize="none"
         autoCorrect={false}
       />
       {value.length > 0 && onClear && (
-        <TouchableOpacity style={styles.clearIcon} onPress={onClear}>
-          <Ionicons name="close-circle" size={20} color={colors.icon} />
+        <TouchableOpacity
+          style={[styles.clearButton, { backgroundColor: colors.surfaceMuted }]}
+          onPress={onClear}
+          accessibilityLabel="Borrar búsqueda"
+        >
+          <X size={14} color={colors.textMuted} strokeWidth={2.5} />
         </TouchableOpacity>
       )}
     </View>
@@ -60,36 +64,25 @@ export function SearchBar({
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
-    borderRadius: 12,
-    overflow: "hidden",
-    // Sombras para iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    // Elevación para Android
-    elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 50,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    gap: 12,
   },
   input: {
-    height: 48,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 48,
-    fontSize: 16,
+    flex: 1,
+    height: "100%",
+    fontSize: 15,
     fontWeight: "500",
   },
-  searchIcon: {
-    position: "absolute",
-    left: 16,
-    top: 14,
-    zIndex: 1,
-  },
-  clearIcon: {
-    position: "absolute",
-    right: 16,
-    top: 14,
-    zIndex: 1,
-    padding: 4,
+  clearButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

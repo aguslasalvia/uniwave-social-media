@@ -21,8 +21,9 @@ export const storage = {
 
   async getTheme() {
     try {
-      const color = await AsyncStorage.getItem("color");
-      return color ? JSON.parse(color) : null;
+      // Matches the key authService.login() actually writes to ("theme").
+      const theme = await AsyncStorage.getItem("theme");
+      return theme ? JSON.parse(theme) : null;
     } catch (e) {
       return null;
     }

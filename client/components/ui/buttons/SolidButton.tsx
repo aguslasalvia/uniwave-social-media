@@ -2,13 +2,12 @@ import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColors } from "@/hooks/useColors";
 
 interface SolidButtonProps {
   title: string;
   onPress: () => void;
-  colors?: string[]; // Ahora será simplemente el primer color
+  colors?: string[]; // Only the first color is used as the background
   style?: any;
   textStyle?: any;
   activeOpacity?: number;
@@ -20,17 +19,15 @@ export function SolidButton({
   colors,
   style,
   textStyle,
-  activeOpacity = 0.8,
+  activeOpacity = 0.85,
 }: SolidButtonProps) {
-  const colorScheme = useColorScheme();
-  const colorsTheme = Colors[colorScheme ?? "light"];
+  const colorsTheme = useColors();
 
-  // Usamos solo el primer color como color de fondo
-  const defaultColor = colors?.[0] || colorsTheme.tint;
+  const backgroundColor = colors?.[0] || colorsTheme.tint;
 
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: defaultColor }, style]}
+      style={[styles.button, { backgroundColor }, style]}
       onPress={onPress}
       activeOpacity={activeOpacity}
     >
@@ -41,17 +38,15 @@ export function SolidButton({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 16,
-    height: 56,
+    borderRadius: 14,
+    height: 54,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 8,
-    // Quitar `boxShadow` que no es válido en React Native
   },
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.5,
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
 });

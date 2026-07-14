@@ -2,8 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColors } from "@/hooks/useColors";
 
 interface DividerProps {
   text?: string;
@@ -11,16 +10,15 @@ interface DividerProps {
 }
 
 export function Divider({ text = "o continúa con", style }: DividerProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
 
   return (
     <View style={[styles.container, style]}>
-      <View style={[styles.line, { backgroundColor: colors.icon }]} />
-      <ThemedText style={[styles.text, { color: colors.icon }]}>
+      <View style={[styles.line, { backgroundColor: colors.border }]} />
+      <ThemedText style={[styles.text, { color: colors.textMuted }]}>
         {text}
       </ThemedText>
-      <View style={[styles.line, { backgroundColor: colors.icon }]} />
+      <View style={[styles.line, { backgroundColor: colors.border }]} />
     </View>
   );
 }
@@ -34,11 +32,10 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    opacity: 0.3,
   },
   text: {
     marginHorizontal: 16,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
   },
 });

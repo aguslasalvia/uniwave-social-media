@@ -1,8 +1,17 @@
-import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import {
+  AtSign,
+  ChevronDown,
+  GraduationCap,
+  LibraryBig,
+  Lock,
+  Mail,
+  Phone,
+  User,
+  X,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -11,11 +20,15 @@ import {
   View,
 } from "react-native";
 
-import { DateInput, FormInput, SolidButton, ThemedText } from "@/components";
-import { Colors } from "@/constants/Colors";
+import { WaveMark } from "@/components/ui/brand";
+import { SolidButton } from "@/components/ui/buttons";
+import { DateInput, FormInput } from "@/components/ui/forms";
+import { ThemedText } from "@/components/ui/themed";
+import { ToastHost, useToast } from "@/components/ui/toast";
+import { withAlpha } from "@/constants/Colors";
 import { initialRegisterForm, RegisterForm } from "@/core/User";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { universityService } from "@/services/universityServices";
+import { useColors } from "@/hooks/useColors";
 
 interface RegisterModalProps {
   visible: boolean;
@@ -32,8 +45,8 @@ export function RegisterModal({
   const [universities, setUniversities] =
     useState<[{ id: string; name: string }]>();
   const [isLoading, setIsLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
+  const { showToast } = useToast();
 
   const updateForm = (field: string, value: string) => {
     setForm((prev) => ({
@@ -51,7 +64,6 @@ export function RegisterModal({
   }, []);
 
   const handleRegister = async () => {
-    // Validaciones básicas
     if (
       !form.fullName ||
       !form.username ||
@@ -63,33 +75,28 @@ export function RegisterModal({
       !form.password ||
       !form.confirmPassword
     ) {
-      Alert.alert("Error", "Por favor completa todos los campos");
+      showToast("Por favor completa todos los campos", "error");
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden");
+      showToast("Las contraseñas no coinciden", "error");
       return;
     }
 
     if (form.password.length < 8) {
-      Alert.alert("Error", "La contraseña debe tener al menos 8 caracteres");
+      showToast("La contraseña debe tener al menos 8 caracteres", "error");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Llamar al callback de registro
       await onRegister(form);
-      // Solo cerrar el modal si el registro fue exitoso
+      // Only close the modal when registration succeeded
       handleClose();
     } catch (error: any) {
-      // Mostrar el error pero no cerrar el modal
-      Alert.alert(
-        "Error de registro",
-        error.message || "Error al registrar usuario",
-      );
-      // El modal permanece abierto y los valores se mantienen
+      // Keep the modal (and the entered values) open on failure
+      showToast(error.message || "Error al registrar usuario", "error");
     } finally {
       setIsLoading(false);
     }
@@ -100,11 +107,6 @@ export function RegisterModal({
     onClose();
   };
 
-  // const handleGoogleRegister = () => {
-  //   // Aquí iría la lógica de registro con Google
-  //   console.log("Google register");
-  // };
-
   return (
     <Modal
       visible={visible}
@@ -112,23 +114,29 @@ export function RegisterModal({
       presentationStyle="pageSheet"
       onRequestClose={handleClose}
     >
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colorScheme === "dark" ? "#0f172a" : "#ffffff" },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {/* RN's Modal opens its own native layer, so the toast host at the
+            app root can't show through it — mount a local one here. */}
+        <ToastHost />
+
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={colors.text} />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.closeButton}
+            accessibilityLabel="Cerrar"
+          >
+            <X size={22} color={colors.text} strokeWidth={2} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Crear Cuenta
+            Crear cuenta
           </Text>
           <TouchableOpacity
             onPress={handleRegister}
-            style={styles.registerButton}
+            style={[
+              styles.registerButton,
+              { backgroundColor: withAlpha(colors.tint, 0.12) },
+            ]}
             disabled={isLoading}
           >
             <Text style={[styles.registerButtonText, { color: colors.tint }]}>
@@ -138,51 +146,49 @@ export function RegisterModal({
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Header Section */}
+          {/* Brand */}
           <View style={styles.headerSection}>
-            <View
-              style={[styles.logoContainer, { backgroundColor: colors.tint }]}
-            >
-              <Ionicons name="school" size={32} color="#ffffff" />
-            </View>
-            <ThemedText style={styles.title}>Únete a UniWave</ThemedText>
-            <ThemedText style={[styles.subtitle, { color: colors.icon }]}>
+            <WaveMark size={56} color={colors.tint} />
+            <ThemedText style={styles.title}>
+              Únete a Uni
+              <ThemedText style={[styles.title, { color: colors.tint }]}>
+                Wave
+              </ThemedText>
+            </ThemedText>
+            <ThemedText style={[styles.subtitle, { color: colors.textMuted }]}>
               Crea tu cuenta y conecta con tu comunidad universitaria
             </ThemedText>
           </View>
 
-          {/* Form Section */}
+          {/* Form */}
           <View style={styles.formContainer}>
-            {/* Full Name Input */}
             <FormInput
               placeholder="Nombre completo"
               value={form.fullName}
               onChangeText={(value) => updateForm("fullName", value)}
-              icon="person"
+              icon={User}
               autoCapitalize="words"
               autoCorrect={false}
               style={styles.inputWrapper}
               editable={!isLoading}
             />
 
-            {/* Username Input */}
             <FormInput
               placeholder="Nombre de usuario"
               value={form.username}
               onChangeText={(value) => updateForm("username", value)}
-              icon="at"
+              icon={AtSign}
               autoCapitalize="none"
               autoCorrect={false}
               style={styles.inputWrapper}
               editable={!isLoading}
             />
 
-            {/* Email Input */}
             <FormInput
               placeholder="Correo universitario"
               value={form.email}
               onChangeText={(value) => updateForm("email", value)}
-              icon="mail"
+              icon={Mail}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -190,12 +196,11 @@ export function RegisterModal({
               editable={!isLoading}
             />
 
-            {/* Phone Input */}
             <FormInput
               placeholder="Teléfono"
               value={form.phone}
               onChangeText={(value) => updateForm("phone", value)}
-              icon="call"
+              icon={Phone}
               keyboardType="phone-pad"
               autoCapitalize="none"
               autoCorrect={false}
@@ -203,51 +208,31 @@ export function RegisterModal({
               editable={!isLoading}
             />
 
-            {/* Date of Birth Input */}
             <DateInput
               placeholder="Fecha de nacimiento"
               value={form.dateOfBirth}
               onChangeText={(value) => updateForm("dateOfBirth", value)}
-              icon="calendar"
               style={styles.inputWrapper}
               maximumDate={new Date()}
               minimumDate={new Date(1950, 0, 1)}
               display="calendar"
               locale="es-ES"
-              theme={{
-                backgroundColor: colorScheme === "dark" ? "#1e293b" : "#f8fafc",
-                textColor: colors.text,
-                accentColor: colors.tint,
-                borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                placeholderColor: colors.icon,
-              }}
               disabled={isLoading}
             />
 
-            {/* University Input */}
-            <View style={[styles.selectContainer, styles.inputWrapper]}>
-              <Ionicons
-                name="school"
-                size={20}
-                color={colors.tint}
-                style={styles.selectIcon}
-              />
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={colors.icon}
-                style={styles.selectRightIcon}
-              />
-              <View
-                style={[
-                  styles.selectField,
-                  {
-                    backgroundColor:
-                      colorScheme === "dark" ? "#1e293b" : "#ffffff",
-                    borderColor: colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                  },
-                ]}
-              >
+            {/* University picker */}
+            <View
+              style={[
+                styles.selectContainer,
+                styles.inputWrapper,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <GraduationCap size={19} color={colors.textMuted} strokeWidth={2} />
+              <View style={styles.selectField}>
                 <Picker
                   selectedValue={form.university}
                   onValueChange={(itemValue: any) =>
@@ -259,8 +244,7 @@ export function RegisterModal({
                   dropdownIconRippleColor={"transparent"}
                   style={{
                     color: colors.text,
-                    fontSize: 16,
-                    fontWeight: "500",
+                    fontSize: 15,
                     width: "100%",
                     backgroundColor: "transparent",
                   }}
@@ -271,67 +255,52 @@ export function RegisterModal({
                   ))}
                 </Picker>
               </View>
+              <ChevronDown size={17} color={colors.textMuted} strokeWidth={2} />
             </View>
 
-            {/* Career Input */}
             <FormInput
               placeholder="Carrera"
               value={form.career}
               onChangeText={(value) => updateForm("career", value)}
-              icon="library"
+              icon={LibraryBig}
               autoCapitalize="words"
               autoCorrect={false}
               style={styles.inputWrapper}
               editable={!isLoading}
             />
 
-            {/* Password Input */}
             <FormInput
               placeholder="Contraseña"
               value={form.password}
               onChangeText={(value) => updateForm("password", value)}
-              icon="lock-closed"
+              icon={Lock}
               secureTextEntry={true}
               autoCapitalize="none"
               style={styles.inputWrapper}
               editable={!isLoading}
             />
 
-            {/* Confirm Password Input */}
             <FormInput
               placeholder="Confirmar contraseña"
               value={form.confirmPassword}
               onChangeText={(value) => updateForm("confirmPassword", value)}
-              icon="lock-closed"
+              icon={Lock}
               secureTextEntry={true}
               autoCapitalize="none"
               style={styles.inputWrapper}
               editable={!isLoading}
             />
 
-            {/* Register Button */}
             <SolidButton
-              title="Crear Cuenta"
+              title="Crear cuenta"
               onPress={handleRegister}
               style={styles.registerButtonStyle}
             />
 
-            {/* Divider */}
-            {/* <Divider /> */}
-
-            {/* Google Register Button */}
-            {/* <SocialButton
-							title="Google"
-							onPress={handleGoogleRegister}
-							icon="logo-google"
-							iconColor="#DB4437"
-							style={styles.googleButton}
-						/> */}
-
-            {/* Login Link */}
+            {/* Login link */}
             <View style={styles.loginLinkContainer}>
               <ThemedText
-                style={[styles.loginLinkText, { color: colors.icon }]}
+                style={[styles.loginLinkText, { color: colors.textMuted }]}
               >
                 ¿Ya tienes una cuenta?{" "}
               </ThemedText>
@@ -356,24 +325,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.1)",
   },
   closeButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
   },
   registerButton: {
-    padding: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
   },
   registerButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -381,70 +351,43 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  logoContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-    elevation: 8,
+    marginTop: 24,
+    marginBottom: 28,
+    gap: 4,
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-    letterSpacing: -0.5,
+    fontWeight: "800",
+    letterSpacing: -0.6,
+    marginTop: 12,
   },
   subtitle: {
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
+    maxWidth: 280,
   },
   formContainer: {
-    gap: 16,
+    gap: 0,
   },
   inputWrapper: {
     marginBottom: 12,
   },
   selectContainer: {
-    position: "relative",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  selectIcon: {
-    position: "absolute",
-    left: 16,
-    top: 16,
-    zIndex: 1,
-  },
-  selectRightIcon: {
-    position: "absolute",
-    right: 16,
-    top: 16,
-    zIndex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 54,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    gap: 8,
   },
   selectField: {
-    height: 56,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 48,
+    flex: 1,
     justifyContent: "center",
   },
   registerButtonStyle: {
     marginTop: 8,
-  },
-  googleButton: {
-    marginTop: 0,
   },
   loginLinkContainer: {
     flexDirection: "row",
@@ -457,6 +400,6 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

@@ -1,7 +1,15 @@
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import {
+  CalendarDays,
+  Heart,
+  LogOut,
+  LucideIcon,
+  Settings,
+  Share2,
+  Users,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -13,168 +21,59 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EditProfileModal } from "@/components";
-import { Colors } from "@/constants/Colors";
-import { UserProfile } from "@/core/User";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { withAlpha } from "@/constants/Colors";
+import { authService } from "@/services/authService";
 import { userService } from "@/services/userService";
+import { useColors } from "@/hooks/useColors";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
-// Datos estáticos para secciones que aún no están conectadas al backend
-const staticData = {
-  stats: {
-    posts: 0,
-    followers: 0,
-    following: 0,
-    achievements: 0,
-    events: 0,
-    groups: 0,
-  },
-  achievements: [
-    {
-      id: 1,
-      name: "Primer Post",
-      icon: "📝",
-      color: "#FF6B6B",
-      description: "Comunidad",
-    },
-    {
-      id: 2,
-      name: "Evento Asistido",
-      icon: "📅",
-      color: "#4ECDC4",
-      description: "Primer evento",
-    },
-    {
-      id: 3,
-      name: "Grupo Creado",
-      icon: "👥",
-      color: "#45B7D1",
-      description: "Primer grupo",
-    },
-  ],
-  interests: [
-    { id: 1, name: "Tecnología", icon: "💻" },
-    { id: 2, name: "Innovación", icon: "🚀" },
-    { id: 3, name: "Aprendizaje", icon: "📚" },
-  ],
-};
+// Mock data for the posts grid; placeholder photos from Lorem Picsum
+// (seeded so every reload shows the same image per post).
+const posts = [
+  { id: 1, likes: 156, caption: "Nueva exposición en el Museo del Prado" },
+  { id: 2, likes: 89, caption: "Fotografía urbana en Madrid" },
+  { id: 3, likes: 234, caption: "Teatro clásico en la universidad" },
+  { id: 4, likes: 67, caption: "Visita al Louvre en París" },
+  { id: 5, likes: 123, caption: "Investigación sobre Velázquez" },
+  { id: 6, likes: 198, caption: "Mi proyecto de tesis" },
+  { id: 7, likes: 145, caption: "Viaje de estudios a Florencia" },
+  { id: 8, likes: 78, caption: "Nuevo libro sobre arte barroco" },
+  { id: 9, likes: 112, caption: "Documental sobre restauración" },
+].map((post) => ({
+  ...post,
+  image: `https://picsum.photos/seed/uniwave-${post.id}/300/300`,
+}));
 
-// Mock data for posts grid - Diverse content
-const posts: any[] = [
-  {
-    id: 1,
-    type: "image",
-    content: "🖼️",
-    likes: 156,
-    caption: "Nueva exposición en el Museo del Prado",
-  },
-  {
-    id: 2,
-    type: "image",
-    content: "📸",
-    likes: 89,
-    caption: "Fotografía urbana en Madrid",
-  },
-  {
-    id: 3,
-    type: "image",
-    content: "🎭",
-    likes: 234,
-    caption: "Teatro clásico en la universidad",
-  },
-  {
-    id: 4,
-    type: "image",
-    content: "🏛️",
-    likes: 67,
-    caption: "Visita al Louvre en París",
-  },
-  {
-    id: 5,
-    type: "image",
-    content: "📚",
-    likes: 123,
-    caption: "Investigación sobre Velázquez",
-  },
-  {
-    id: 6,
-    type: "image",
-    content: "🎨",
-    likes: 198,
-    caption: "Mi proyecto de tesis",
-  },
-  {
-    id: 7,
-    type: "image",
-    content: "✈️",
-    likes: 145,
-    caption: "Viaje de estudios a Florencia",
-  },
-  {
-    id: 8,
-    type: "image",
-    content: "📖",
-    likes: 78,
-    caption: "Nuevo libro sobre arte barroco",
-  },
-  {
-    id: 9,
-    type: "image",
-    content: "🎬",
-    likes: 112,
-    caption: "Documental sobre restauración",
-  },
+const profileTabs: { key: string; label: string }[] = [
+  { key: "posts", label: "Posts" },
+  { key: "events", label: "Eventos" },
+  { key: "groups", label: "Grupos" },
 ];
 
 export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userStats, setUserStats] = useState({
     posts: 0,
     followers: 0,
     following: 0,
   });
   const [loading, setLoading] = useState(true);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useColors();
+  const userProfile = useUserProfile();
 
   useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  const loadUserProfile = async () => {
-    try {
-      const profile = await userService.getUserProfile();
-      const stats = await userService.getUserStats();
-      setUserProfile(profile);
-      setUserStats(stats);
-    } catch (error) {
-      console.error("Error loading user profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditProfile = async (data: any) => {
-    try {
-      if (userProfile) {
-        const updatedProfile: UserProfile = {
-          ...userProfile,
-          fullName: data.name,
-          username: data.username,
-          email: data.email,
-          phone: data.phone,
-          university: data.university,
-          career: data.major,
-        };
-
-        await userService.updateUserProfile(updatedProfile);
-        setUserProfile(updatedProfile);
+    const loadStats = async () => {
+      try {
+        setUserStats(await userService.getUserStats());
+      } catch (error) {
+        console.error("Error loading user stats:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
+    };
+    loadStats();
+  }, []);
 
   const handleOpenEditModal = () => {
     if (userProfile) {
@@ -182,55 +81,26 @@ export default function ProfileScreen() {
     }
   };
 
-  const renderAchievement = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.achievementItem}>
-      <View style={[styles.achievementIcon, { backgroundColor: item.color }]}>
-        <Text style={styles.achievementIconText}>{item.icon}</Text>
-      </View>
-      <Text
-        style={[styles.achievementName, { color: colors.text }]}
-        numberOfLines={1}
-      >
-        {item.name}
-      </Text>
-      <Text
-        style={[styles.achievementDescription, { color: colors.icon }]}
-        numberOfLines={1}
-      >
-        {item.description}
-      </Text>
-    </TouchableOpacity>
-  );
+  const handleLogout = () => {
+    Alert.alert("Cerrar sesión", "¿Seguro que quieres salir?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Cerrar sesión",
+        style: "destructive",
+        onPress: () => authService.logout(),
+      },
+    ]);
+  };
 
-  const renderInterest = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={[
-        styles.interestItem,
-        { backgroundColor: colorScheme === "dark" ? "#1e293b" : "#f8fafc" },
-      ]}
-    >
-      <Text style={styles.interestIcon}>{item.icon}</Text>
-      <Text
-        style={[styles.interestName, { color: colors.text }]}
-        numberOfLines={1}
-      >
-        {item.name}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  const renderPost = ({ item }: { item: any }) => (
+  const renderPost = ({ item }: { item: (typeof posts)[number] }) => (
     <TouchableOpacity style={styles.postGridItem}>
       <View
-        style={[
-          styles.postContent,
-          { backgroundColor: colorScheme === "dark" ? "#1e293b" : "#f8fafc" },
-        ]}
+        style={[styles.postContent, { backgroundColor: colors.surfaceMuted }]}
       >
-        <Text style={styles.postEmoji}>{item.content}</Text>
+        <Image source={{ uri: item.image }} style={styles.postImage} />
         <View style={styles.postOverlay}>
           <View style={styles.postStats}>
-            <Ionicons name="heart" size={16} color="#ffffff" />
+            <Heart size={12} color="#ffffff" fill="#ffffff" />
             <Text style={styles.postStatsText}>{item.likes}</Text>
           </View>
         </View>
@@ -238,439 +108,248 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
+  const EmptyState = ({
+    icon: Icon,
+    title,
+    subtitle,
+  }: {
+    icon: LucideIcon;
+    title: string;
+    subtitle: string;
+  }) => (
+    <View style={styles.emptyState}>
+      <Icon size={30} color={colors.textMuted} strokeWidth={1.6} />
+      <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
+        {title}
+      </Text>
+      <Text style={[styles.emptyStateSubtitle, { color: colors.textMuted }]}>
+        {subtitle}
+      </Text>
+    </View>
+  );
+
+  const Stat = ({ value, label }: { value: number; label: string }) => (
+    <Text style={[styles.statText, { color: colors.textMuted }]}>
+      <Text style={[styles.statNumber, { color: colors.text }]}>{value}</Text>
+      {` ${label}`}
+    </Text>
+  );
+
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colorScheme === "dark" ? "#0f172a" : "#f8fafc" },
-      ]}
-    >
-      <LinearGradient
-        colors={
-          colorScheme === "dark"
-            ? ["#0f172a", "#1e293b"]
-            : ["#f8fafc", "#ffffff"]
-        }
-        style={styles.gradient}
-      >
-        <SafeAreaView
-          style={styles.safeArea}
-          edges={["bottom", "left", "right"]}
-        >
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <Text style={[styles.loadingText, { color: colors.text }]}>
-                Cargando perfil...
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <Text style={[styles.loadingText, { color: colors.text }]}>
+              Cargando perfil...
+            </Text>
+          </View>
+        ) : (
+          <>
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={[styles.headerTitle, { color: colors.text }]}>
+                {userProfile ? `@${userProfile.username}` : "@usuario"}
               </Text>
+              <View style={styles.headerActions}>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={handleOpenEditModal}
+                  accessibilityLabel="Ajustes"
+                >
+                  <Settings
+                    size={22}
+                    color={colors.textMuted}
+                    strokeWidth={1.8}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={handleLogout}
+                  accessibilityLabel="Cerrar sesión"
+                >
+                  <LogOut size={22} color={colors.danger} strokeWidth={1.8} />
+                </TouchableOpacity>
+              </View>
             </View>
-          ) : (
-            <>
-              {/* Header */}
-              <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                  <Text style={[styles.headerTitle, { color: colors.text }]}>
-                    {userProfile ? `@${userProfile.username}` : "@usuario"}
-                  </Text>
-                  <Text style={[styles.headerSubtitle, { color: colors.icon }]}>
-                    Tu espacio personal
-                  </Text>
-                </View>
-                <View style={styles.headerRight}>
-                  <TouchableOpacity style={styles.headerButton}>
-                    <Ionicons
-                      name="notifications-outline"
-                      size={24}
-                      color={colors.icon}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.headerButton}
-                    onPress={handleOpenEditModal}
+
+            <ScrollView
+              style={styles.content}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Profile header */}
+              <View style={styles.profileHeader}>
+                {userProfile?.avatar ? (
+                  <Image
+                    source={{ uri: userProfile.avatar }}
+                    style={[styles.avatar, { borderColor: colors.border }]}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.avatar,
+                      styles.avatarFallback,
+                      {
+                        backgroundColor: withAlpha(colors.tint, 0.14),
+                        borderColor: colors.border,
+                      },
+                    ]}
                   >
-                    <Ionicons
-                      name="settings-outline"
-                      size={24}
-                      color={colors.icon}
-                    />
-                  </TouchableOpacity>
+                    <Text style={[styles.avatarInitial, { color: colors.tint }]}>
+                      {(userProfile?.fullName || "U").charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+
+                <View style={styles.profileInfo}>
+                  <Text style={[styles.profileName, { color: colors.text }]}>
+                    {userProfile ? userProfile.fullName : "Cargando..."}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.profileDetail,
+                      { color: colors.textMuted },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {userProfile ? userProfile.university : "Universidad"}
+                  </Text>
+                  <Text
+                    style={[styles.profileDetail, { color: colors.textMuted }]}
+                    numberOfLines={1}
+                  >
+                    {userProfile ? userProfile.career : "Carrera"}
+                  </Text>
                 </View>
               </View>
 
-              <ScrollView
-                style={styles.content}
-                showsVerticalScrollIndicator={false}
+              {/* Stats */}
+              <View style={styles.statsRow}>
+                <Stat value={userStats.posts} label="posts" />
+                <Text style={[styles.statDot, { color: colors.textMuted }]}>
+                  ·
+                </Text>
+                <Stat value={userStats.followers} label="seguidores" />
+                <Text style={[styles.statDot, { color: colors.textMuted }]}>
+                  ·
+                </Text>
+                <Stat value={userStats.following} label="siguiendo" />
+              </View>
+
+              {/* Actions */}
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={[styles.editButton, { borderColor: colors.border }]}
+                  onPress={handleOpenEditModal}
+                >
+                  <Text style={[styles.editButtonText, { color: colors.text }]}>
+                    Editar perfil
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.shareButton, { borderColor: colors.border }]}
+                  accessibilityLabel="Compartir perfil"
+                >
+                  <Share2 size={18} color={colors.text} strokeWidth={1.8} />
+                </TouchableOpacity>
+              </View>
+
+              {/* Tabs */}
+              <View
+                style={[styles.tabsRow, { borderBottomColor: colors.border }]}
               >
-                {/* Profile Header */}
-                <View style={styles.profileHeader}>
-                  <View style={styles.profileImageContainer}>
-                    {userProfile?.avatar ? (
-                      <Image
-                        source={{ uri: userProfile.avatar }}
-                        style={{ width: 100, height: 100, borderRadius: 50 }}
-                      />
-                    ) : (
-                      <View
+                {profileTabs.map(({ key, label }) => {
+                  const active = activeTab === key;
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      style={styles.tab}
+                      onPress={() => setActiveTab(key)}
+                    >
+                      <Text
                         style={[
-                          styles.profileImage,
-                          { backgroundColor: colors.tint },
+                          styles.tabLabel,
+                          {
+                            color: active ? colors.text : colors.textMuted,
+                            fontWeight: active ? "700" : "500",
+                          },
                         ]}
                       >
-                        <Text style={[styles.profileAvatar, { color: "#ffffff" }]}>
-                          {(userProfile?.fullName || "U")
-                            .charAt(0)
-                            .toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
+                        {label}
+                      </Text>
+                      {active && (
+                        <View
+                          style={[
+                            styles.tabIndicator,
+                            { backgroundColor: colors.tint },
+                          ]}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
 
-                  <View style={styles.profileInfo}>
-                    <Text style={[styles.profileName, { color: colors.text }]}>
-                      {userProfile ? userProfile.fullName : "Cargando..."}
-                    </Text>
-                    <Text
-                      style={[styles.profileUniversity, { color: colors.icon }]}
-                    >
-                      {userProfile ? userProfile.university : "Universidad"}
-                    </Text>
-                    <Text style={[styles.profileMajor, { color: colors.icon }]}>
-                      {userProfile ? userProfile.career : "Carrera"} • 4to Año
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Stats */}
-                <View
-                  style={[
-                    styles.statsContainer,
-                    {
-                      backgroundColor:
-                        colorScheme === "dark" ? "#1e293b" : "#f8fafc",
-                    },
-                  ]}
-                >
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {userStats.posts}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.icon }]}>
-                      Publicaciones
-                    </Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {userStats.followers}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.icon }]}>
-                      Seguidores
-                    </Text>
-                  </View>
-                  <View style={styles.statItem}>
-                    <Text style={[styles.statNumber, { color: colors.text }]}>
-                      {userStats.following}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.icon }]}>
-                      Siguiendo
-                    </Text>
-                  </View>
-                  {/* <View style={styles.statItem}>
-										<Text style={[styles.statNumber, { color: colors.text }]}>
-											{staticData.stats.achievements}
-										</Text>
-										<Text style={[styles.statLabel, { color: colors.icon }]}>Logros</Text>
-									</View> */}
-                </View>
-
-                {/* Bio */}
-                <View style={styles.bioContainer}>
-                  <Text style={[styles.bioText, { color: colors.text }]}>
-                    Apasionado por el aprendizaje y la innovación tecnológica.
-                    Siempre explorando nuevas formas de conectar con la
-                    comunidad universitaria! 🚀 #tech #innovation #learning
-                  </Text>
-                </View>
-
-                {/* Contact Info */}
-                <View
-                  style={[
-                    styles.infoContainer,
-                    {
-                      backgroundColor:
-                        colorScheme === "dark" ? "#1e293b" : "#f8fafc",
-                    },
-                  ]}
-                >
-                  <View style={styles.infoItem}>
-                    <Ionicons
-                      name="mail-outline"
-                      size={16}
-                      color={colors.icon}
-                    />
-                    <Text style={[styles.infoText, { color: colors.text }]}>
-                      {userProfile ? userProfile.email : "email@ejemplo.com"}
-                    </Text>
-                  </View>
-                  <View style={styles.infoItem}>
-                    <Ionicons
-                      name="call-outline"
-                      size={16}
-                      color={colors.icon}
-                    />
-                    <Text style={[styles.infoText, { color: colors.text }]}>
-                      {userProfile ? userProfile.phone : "+34 612 345 678"}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Action Buttons */}
-                <View style={styles.actionButtons}>
-                  <TouchableOpacity
-                    style={[styles.editButton, { borderColor: colors.icon }]}
-                    onPress={handleOpenEditModal}
-                  >
-                    <Text
-                      style={[styles.editButtonText, { color: colors.text }]}
-                    >
-                      Editar Perfil
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.shareButton,
-                      { backgroundColor: colors.tint },
-                    ]}
-                  >
-                    <Ionicons name="share-outline" size={20} color="#ffffff" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Interests */}
-                <View style={styles.interestsSection}>
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Intereses
-                  </Text>
+              {/* Posts grid */}
+              {activeTab === "posts" && (
+                <View style={styles.postsGrid}>
                   <FlatList
-                    data={staticData.interests}
-                    renderItem={renderInterest}
+                    data={posts as any[]}
+                    renderItem={renderPost}
                     keyExtractor={(item) => item.id.toString()}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.interestsList}
+                    numColumns={3}
+                    scrollEnabled={false}
+                    columnWrapperStyle={styles.postRow}
                   />
                 </View>
+              )}
 
-                {/* Achievements */}
-                <View style={styles.achievementsSection}>
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    Logros y Reconocimientos
-                  </Text>
-                  <FlatList
-                    data={staticData.achievements}
-                    renderItem={renderAchievement}
-                    keyExtractor={(item) => item.id.toString()}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.achievementsList}
-                  />
-                </View>
-
-                {/* Tabs */}
-                <View
-                  style={[
-                    styles.tabsContainer,
-                    {
-                      borderTopColor:
-                        colorScheme === "dark" ? "#334155" : "#e2e8f0",
-                    },
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      activeTab === "posts" && styles.activeTab,
-                      {
-                        borderTopColor: colors.tint,
-                      },
-                    ]}
-                    onPress={() => setActiveTab("posts")}
-                  >
-                    <Ionicons
-                      name="grid-outline"
-                      size={24}
-                      color={activeTab === "posts" ? colors.tint : colors.icon}
-                    />
-                    <Text
-                      style={[
-                        styles.tabText,
-                        {
-                          color:
-                            activeTab === "posts" ? colors.tint : colors.icon,
-                        },
-                      ]}
-                    >
-                      Publicaciones
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      activeTab === "events" && styles.activeTab,
-                      {
-                        borderTopColor: colors.tint,
-                      },
-                    ]}
-                    onPress={() => setActiveTab("events")}
-                  >
-                    <Ionicons
-                      name="calendar-outline"
-                      size={24}
-                      color={activeTab === "events" ? colors.tint : colors.icon}
-                    />
-                    <Text
-                      style={[
-                        styles.tabText,
-                        {
-                          color:
-                            activeTab === "events" ? colors.tint : colors.icon,
-                        },
-                      ]}
-                    >
-                      Eventos
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.tab,
-                      activeTab === "groups" && styles.activeTab,
-                      {
-                        borderTopColor: colors.tint,
-                      },
-                    ]}
-                    onPress={() => setActiveTab("groups")}
-                  >
-                    <Ionicons
-                      name="people-outline"
-                      size={24}
-                      color={activeTab === "groups" ? colors.tint : colors.icon}
-                    />
-                    <Text
-                      style={[
-                        styles.tabText,
-                        {
-                          color:
-                            activeTab === "groups" ? colors.tint : colors.icon,
-                        },
-                      ]}
-                    >
-                      Grupos
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Posts Grid */}
-                {activeTab === "posts" && (
-                  <View style={styles.postsGrid}>
-                    <FlatList
-                      data={posts as any[]}
-                      renderItem={renderPost}
-                      keyExtractor={(item) => item.id.toString()}
-                      numColumns={3}
-                      scrollEnabled={false}
-                      contentContainerStyle={styles.postsGridContainer}
-                    />
-                  </View>
-                )}
-
-                {/* Events Tab */}
-                {activeTab === "events" && (
-                  <View style={styles.eventsContainer}>
-                    <View style={styles.emptyState}>
-                      <Ionicons
-                        name="calendar-outline"
-                        size={64}
-                        color={colors.icon}
-                      />
-                      <Text
-                        style={[styles.emptyStateTitle, { color: colors.text }]}
-                      >
-                        Próximos Eventos
-                      </Text>
-                      <Text
-                        style={[
-                          styles.emptyStateSubtitle,
-                          { color: colors.icon },
-                        ]}
-                      >
-                        No tienes eventos programados
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {/* Groups Tab */}
-                {activeTab === "groups" && (
-                  <View style={styles.groupsContainer}>
-                    <View style={styles.emptyState}>
-                      <Ionicons
-                        name="people-outline"
-                        size={64}
-                        color={colors.icon}
-                      />
-                      <Text
-                        style={[styles.emptyStateTitle, { color: colors.text }]}
-                      >
-                        Grupos de Estudio
-                      </Text>
-                      <Text
-                        style={[
-                          styles.emptyStateSubtitle,
-                          { color: colors.icon },
-                        ]}
-                      >
-                        No estás en ningún grupo activo
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                {/* Bottom padding for floating tab bar */}
-                <View style={styles.bottomPadding} />
-              </ScrollView>
-
-              {/* Edit Profile Modal */}
-              {userProfile && (
-                <EditProfileModal
-                  visible={showEditModal}
-                  onClose={() => setShowEditModal(false)}
-                  onSave={handleEditProfile}
-                  initialData={{
-                    id: userProfile.id,
-                    name: userProfile.fullName,
-                    username: userProfile.username,
-                    email: userProfile.email,
-                    phone: userProfile.phone,
-                    dateOfBirth: userProfile.dateOfBirth.split("T")[0], // Convertir ISO a YYYY-MM-DD
-                    // bio: 'Apasionado por el aprendizaje y la innovación tecnológica. Siempre explorando nuevas formas de conectar con la comunidad universitaria! 🚀 #tech #innovation #learning',
-                    university: userProfile.university,
-                    career: userProfile.career,
-                  }}
+              {activeTab === "events" && (
+                <EmptyState
+                  icon={CalendarDays}
+                  title="Próximos eventos"
+                  subtitle="No tienes eventos programados"
                 />
               )}
-            </>
-          )}
-        </SafeAreaView>
-      </LinearGradient>
+
+              {activeTab === "groups" && (
+                <EmptyState
+                  icon={Users}
+                  title="Grupos de estudio"
+                  subtitle="No estás en ningún grupo activo"
+                />
+              )}
+
+              {/* Bottom padding for the floating tab bar */}
+              <View style={styles.bottomPadding} />
+            </ScrollView>
+
+            {/* Edit profile modal */}
+            {userProfile && (
+              <EditProfileModal
+                visible={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                initialData={{
+                  id: userProfile.id,
+                  name: userProfile.fullName,
+                  username: userProfile.username,
+                  email: userProfile.email,
+                  phone: userProfile.phone,
+                  dateOfBirth: userProfile.dateOfBirth.split("T")[0],
+                  university: userProfile.university,
+                  career: userProfile.career,
+                }}
+              />
+            )}
+          </>
+        )}
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  gradient: {
     flex: 1,
   },
   safeArea: {
@@ -681,27 +360,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    marginTop: 50,
-  },
-  headerLeft: {
-    flex: 1,
+    paddingTop: 12,
+    paddingBottom: 14,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800",
     letterSpacing: -0.5,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  headerRight: {
+  headerActions: {
     flexDirection: "row",
-    gap: 16,
+    marginRight: -10,
   },
   headerButton: {
-    padding: 8,
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: {
     flex: 1,
@@ -710,275 +385,155 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 24,
+    marginBottom: 16,
   },
-  profileImageContainer: {
-    position: "relative",
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: StyleSheet.hairlineWidth,
     marginRight: 16,
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  avatarFallback: {
     justifyContent: "center",
     alignItems: "center",
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-    elevation: 8,
   },
-  profileAvatar: {
-    fontSize: 48,
-  },
-  editAvatarButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#6366f1",
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#ffffff",
+  avatarInitial: {
+    fontSize: 34,
+    fontWeight: "800",
   },
   profileInfo: {
     flex: 1,
+    gap: 2,
   },
   profileName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.4,
   },
-  profileUniversity: {
-    fontSize: 16,
-    marginBottom: 2,
+  profileDetail: {
+    fontSize: 13.5,
   },
-  profileMajor: {
-    fontSize: 14,
-  },
-  statsContainer: {
+  statsRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginHorizontal: 20,
-    marginBottom: 24,
-    paddingVertical: 20,
-    borderRadius: 16,
-  },
-  statItem: {
     alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    marginBottom: 18,
+  },
+  statText: {
+    fontSize: 13.5,
   },
   statNumber: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: 13.5,
+    fontWeight: "800",
   },
-  statLabel: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  bioContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  bioText: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  infoContainer: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 12,
-  },
-  infoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  infoText: {
-    fontSize: 14,
-    marginLeft: 12,
+  statDot: {
+    fontSize: 13.5,
   },
   actionButtons: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
     paddingHorizontal: 20,
     marginBottom: 24,
   },
   editButton: {
     flex: 1,
-    height: 44,
+    height: 42,
     borderWidth: 1,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
   editButtonText: {
-    fontSize: 16,
+    fontSize: 14.5,
     fontWeight: "600",
   },
   shareButton: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
+    borderWidth: 1,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
-  interestsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    paddingHorizontal: 20,
-  },
-  interestsList: {
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  interestItem: {
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    minWidth: 80,
-  },
-  interestIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  interestName: {
-    fontSize: 12,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  achievementsSection: {
-    marginBottom: 24,
-  },
-  achievementsList: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  achievementItem: {
-    alignItems: "center",
-    width: 100,
-  },
-  achievementIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
-    elevation: 4,
-  },
-  achievementIconText: {
-    fontSize: 24,
-  },
-  achievementName: {
-    fontSize: 12,
-    fontWeight: "600",
-    textAlign: "center",
-    marginBottom: 2,
-  },
-  achievementDescription: {
-    fontSize: 10,
-    textAlign: "center",
-  },
-  tabsContainer: {
+  tabsRow: {
     flexDirection: "row",
-    borderTopWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     marginBottom: 16,
   },
   tab: {
     flex: 1,
-    height: 60,
-    justifyContent: "center",
     alignItems: "center",
-    gap: 4,
+    paddingVertical: 11,
   },
-  activeTab: {
-    borderTopWidth: 2,
-    // borderTopColor: '#6366f1',
+  tabLabel: {
+    fontSize: 13.5,
   },
-  tabText: {
-    fontSize: 12,
-    fontWeight: "600",
+  tabIndicator: {
+    position: "absolute",
+    bottom: 0,
+    height: 2,
+    width: 48,
+    borderRadius: 1,
   },
   postsGrid: {
     paddingHorizontal: 20,
   },
-  postsGridContainer: {
-    gap: 2,
-  },
   postRow: {
-    flexDirection: "row",
-    gap: 2,
-    marginBottom: 2,
+    gap: 4,
+    marginBottom: 4,
   },
   postGridItem: {
     flex: 1,
     aspectRatio: 1,
-    marginBottom: 2,
   },
   postContent: {
     flex: 1,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
+    borderRadius: 10,
+    overflow: "hidden",
   },
-  postEmoji: {
-    fontSize: 32,
+  postImage: {
+    width: "100%",
+    height: "100%",
   },
   postOverlay: {
     position: "absolute",
-    top: 8,
-    right: 8,
+    top: 6,
+    right: 6,
   },
   postStats: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    backgroundColor: "rgba(15, 23, 42, 0.65)",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
   postStatsText: {
     color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  eventsContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 60,
-  },
-  groupsContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 60,
+    fontSize: 11,
+    fontWeight: "700",
   },
   emptyState: {
     alignItems: "center",
+    gap: 6,
+    paddingVertical: 48,
+    paddingHorizontal: 32,
   },
   emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 8,
   },
   emptyStateSubtitle: {
-    fontSize: 16,
+    fontSize: 13.5,
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: 19,
   },
   bottomPadding: {
-    height: 120,
+    height: 130,
   },
   loadingContainer: {
     flex: 1,
@@ -986,7 +541,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "500",
   },
 });

@@ -9,10 +9,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^4.3.0",
+    "@astrojs/react": "^5.0.0",
     "@astrojs/vercel": "^11.0.3",
     "@splidejs/splide": "^4.1.4",
-    "astro": "^5.13.2",
+    "astro": "^7.0.0",
     "astro-splide": "^2.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

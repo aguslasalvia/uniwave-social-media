@@ -10,20 +10,28 @@ const listeners = new Set<() => void>();
 
 const notify = () => listeners.forEach((listener) => listener());
 
+// Hydrate once from the profile persisted at login. Runs lazily on the
+// first subscriber instead of at import time: module scope also executes
+// during Expo web's static render, where there is no window/localStorage.
+let hydrated = false;
+const hydrate = () => {
+  if (hydrated) return;
+  hydrated = true;
+  storage.getItem(USER_PROFILE_KEY).then((raw) => {
+    if (raw && !profile) {
+      profile = JSON.parse(raw);
+      notify();
+    }
+  });
+};
+
 const subscribe = (listener: () => void) => {
+  hydrate();
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
 };
-
-// Hydrate once from the profile persisted at login.
-storage.getItem(USER_PROFILE_KEY).then((raw) => {
-  if (raw && !profile) {
-    profile = JSON.parse(raw);
-    notify();
-  }
-});
 
 // Single write path for the logged-in user: persists to storage and
 // re-renders every component using useUserProfile().

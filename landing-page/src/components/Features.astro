@@ -44,6 +44,10 @@ const features = [
 		<span class="stamp">Funcionalidades</span>
 		<h2>La cartelera: así se ve por dentro</h2>
 		<p>Capturas reales de la app, colgadas como en la cartelera de tu facultad</p>
+		<p class="board-note">
+			El tema visual se adapta a cada universidad — estas capturas usan el de la
+			Facultad de Química · UDELAR
+		</p>
 	</div>
 
 	<div class="board">
@@ -99,6 +103,17 @@ const features = [
 		margin: 0 auto;
 		max-width: 540px;
 		line-height: 1.7;
+	}
+
+	/* Small mono footnote, in the landing's utility-label voice */
+	.features-header .board-note {
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		letter-spacing: 0.06em;
+		color: var(--primary-light);
+		opacity: 0.85;
+		margin-top: 0.875rem;
+		max-width: 600px;
 	}
 
 	.board {

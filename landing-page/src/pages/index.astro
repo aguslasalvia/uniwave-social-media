@@ -64,6 +64,25 @@ import FAQ from "../components/FAQ.astro";
 						</svg>
 						Todas las universidades
 					</span>
+					<span class="chip">
+						<svg
+							width="13"
+							height="13"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<circle cx="13.5" cy="6.5" r="1"></circle>
+							<circle cx="17.5" cy="10.5" r="1"></circle>
+							<circle cx="8.5" cy="7.5" r="1"></circle>
+							<circle cx="6.5" cy="12.5" r="1"></circle>
+							<path
+								d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2"
+							></path>
+						</svg>
+						Con los colores de tu universidad
+					</span>
 					<span class="chip">iOS próximamente</span>
 				</div>
 			</div>
@@ -458,6 +477,9 @@ import FAQ from "../components/FAQ.astro";
 	#contact {
 		padding: 6.5rem 2rem;
 		text-align: center;
+		background:
+			radial-gradient(ellipse 55% 65% at 50% 110%, rgba(99, 102, 241, 0.1) 0%, transparent 70%),
+			var(--bg-color);
 	}
 
 	.contact-content {
@@ -503,11 +525,19 @@ import FAQ from "../components/FAQ.astro";
 		box-shadow: 7px 7px 0 var(--primary-dark);
 	}
 
-	.contact-email {
+	/* The address as a mono "ticket" on its own line, under the CTA.
+	   Scoped under .contact-content to out-rank the `> p` base rule. */
+	.contact-content > .contact-email {
+		display: block;
+		width: fit-content;
 		font-family: var(--font-mono);
-		font-size: 0.82rem;
+		font-size: 0.8rem;
+		letter-spacing: 0.04em;
 		color: var(--text-muted);
-		margin: 1.5rem 0 0;
+		border: 1.5px dashed rgba(129, 140, 248, 0.35);
+		border-radius: 8px;
+		padding: 0.55rem 1.1rem;
+		margin: 2.5rem auto 0;
 	}
 
 	/* ── Responsive ───────────────────────────── */

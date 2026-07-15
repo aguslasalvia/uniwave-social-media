@@ -6,19 +6,13 @@ import {
   Mail,
   Phone,
   User,
-  X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Modal, ScrollView, StyleSheet, View } from "react-native";
 
 import { DateInput, FormInput } from "@/components/ui/forms";
+import { ModalHeader } from "@/components/ui/modals/ModalHeader";
+import { SectionLabel } from "@/components/ui/themed";
 import { ToastHost, useToast } from "@/components/ui/toast";
 import { userService } from "@/services/userService";
 import { useColors } from "@/hooks/useColors";
@@ -113,12 +107,6 @@ export function EditProfileModal({
     }
   };
 
-  const SectionLabel = ({ children }: { children: string }) => (
-    <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-      {children}
-    </Text>
-  );
-
   return (
     <Modal
       visible={visible}
@@ -131,29 +119,19 @@ export function EditProfileModal({
             app root can't show through it — mount a local one here. */}
         <ToastHost />
 
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity
-            onPress={onClose}
-            style={styles.closeButton}
-            accessibilityLabel="Cerrar"
-          >
-            <X size={22} color={colors.text} strokeWidth={2} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Editar perfil
-          </Text>
-          <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-            <Text style={[styles.saveButtonText, { color: colors.tint }]}>
-              Guardar
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <ModalHeader
+          title="Editar perfil"
+          onClose={onClose}
+          actionLabel="Guardar"
+          onAction={handleSave}
+        />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Personal info */}
           <View style={styles.section}>
-            <SectionLabel>INFORMACIÓN PERSONAL</SectionLabel>
+            <SectionLabel style={styles.sectionLabel}>
+              Información personal
+            </SectionLabel>
 
             <FormInput
               placeholder="Nombre completo"
@@ -199,7 +177,9 @@ export function EditProfileModal({
 
           {/* Academic info */}
           <View style={styles.section}>
-            <SectionLabel>INFORMACIÓN ACADÉMICA</SectionLabel>
+            <SectionLabel style={styles.sectionLabel}>
+              Información académica
+            </SectionLabel>
 
             <FormInput
               placeholder="Universidad"
@@ -220,7 +200,9 @@ export function EditProfileModal({
 
           {/* Password */}
           <View style={styles.section}>
-            <SectionLabel>CAMBIAR CONTRASEÑA</SectionLabel>
+            <SectionLabel style={styles.sectionLabel}>
+              Cambiar contraseña
+            </SectionLabel>
 
             <FormInput
               placeholder="Contraseña actual"
@@ -261,29 +243,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  closeButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  saveButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  saveButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
@@ -292,9 +251,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionLabel: {
-    fontSize: 11.5,
-    fontWeight: "700",
-    letterSpacing: 1.2,
     marginBottom: 12,
   },
   input: {

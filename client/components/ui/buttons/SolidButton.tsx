@@ -1,52 +1,73 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
 
-import { ThemedText } from "@/components/ui/themed";
+import { Fonts, Radius, SHADOW_OFFSET, hardShadow } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 interface SolidButtonProps {
   title: string;
   onPress: () => void;
-  colors?: string[]; // Only the first color is used as the background
-  style?: any;
-  textStyle?: any;
-  activeOpacity?: number;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 }
 
+/**
+ * Primary action, styled after the landing page's .cta-primary:
+ * inverted fill (text color over background color) with a hard offset
+ * shadow in the theme tint. Pressing sinks the button onto its shadow.
+ */
 export function SolidButton({
   title,
   onPress,
-  colors,
+  disabled = false,
   style,
   textStyle,
-  activeOpacity = 0.85,
 }: SolidButtonProps) {
-  const colorsTheme = useColors();
-
-  const backgroundColor = colors?.[0] || colorsTheme.tint;
+  const colors = useColors();
 
   return (
-    <TouchableOpacity
-      style={[styles.button, { backgroundColor }, style]}
+    <Pressable
       onPress={onPress}
-      activeOpacity={activeOpacity}
+      disabled={disabled}
+      accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor: colors.text,
+          boxShadow: hardShadow(colors.tint, pressed ? 0 : SHADOW_OFFSET),
+          transform: pressed
+            ? [{ translateX: SHADOW_OFFSET }, { translateY: SHADOW_OFFSET }]
+            : [],
+          opacity: disabled ? 0.5 : 1,
+        },
+        style,
+      ]}
     >
-      <ThemedText style={[styles.buttonText, textStyle]}>{title}</ThemedText>
-    </TouchableOpacity>
+      <Text style={[styles.label, { color: colors.background }, textStyle]}>
+        {title}
+      </Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 14,
     height: 54,
+    borderRadius: Radius.action,
     justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: {
-    color: "#FFFFFF",
+  label: {
+    fontFamily: Fonts.display,
     fontSize: 16,
-    fontWeight: "700",
     letterSpacing: 0.2,
   },
 });

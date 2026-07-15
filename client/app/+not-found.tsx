@@ -4,6 +4,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius, hardShadow } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 export default function NotFoundScreen() {
@@ -32,8 +33,19 @@ export default function NotFoundScreen() {
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
           Esta página no existe
         </Text>
-        <Link href="/" style={[styles.link, { backgroundColor: colors.tint }]}>
-          <Text style={styles.linkText}>Volver al inicio</Text>
+        <Link
+          href="/"
+          style={[
+            styles.link,
+            {
+              backgroundColor: colors.text,
+              boxShadow: hardShadow(colors.tint),
+            },
+          ]}
+        >
+          <Text style={[styles.linkText, { color: colors.background }]}>
+            Volver al inicio
+          </Text>
         </Link>
       </View>
     </>
@@ -56,8 +68,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
+    fontFamily: Fonts.displayHeavy,
     fontSize: 22,
-    fontWeight: "800",
     letterSpacing: -0.5,
     marginBottom: 8,
   },
@@ -68,12 +80,11 @@ const styles = StyleSheet.create({
   link: {
     paddingVertical: 14,
     paddingHorizontal: 28,
-    borderRadius: 14,
+    borderRadius: Radius.action,
     overflow: "hidden",
   },
   linkText: {
-    color: "#ffffff",
+    fontFamily: Fonts.display,
     fontSize: 15,
-    fontWeight: "700",
   },
 });

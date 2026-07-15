@@ -10,6 +10,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius } from "@/constants/Design";
 import { PostAuthor } from "@/core/Post";
 import { useColors } from "@/hooks/useColors";
 import { timeAgo } from "@/utils/time";
@@ -106,7 +107,7 @@ export function PostCard({
       {firstImage && (
         <Image
           source={{ uri: firstImage }}
-          style={[styles.postImage, { borderColor: colors.border }]}
+          style={[styles.postImage, { borderColor: withAlpha(colors.tint, 0.18) }]}
           resizeMode="cover"
         />
       )}
@@ -207,7 +208,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   timestamp: {
-    fontSize: 13,
+    fontFamily: Fonts.mono,
+    fontSize: 11,
   },
   university: {
     fontSize: 12.5,
@@ -223,7 +225,7 @@ const styles = StyleSheet.create({
   postImage: {
     width: "100%",
     height: 210,
-    borderRadius: 16,
+    borderRadius: Radius.card,
     borderWidth: StyleSheet.hairlineWidth,
     marginTop: 12,
   },

@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
 import { withAlpha } from "@/constants/Colors";
+import { hardShadow } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 interface CategoryCardProps {
@@ -29,8 +30,17 @@ export function CategoryCard({
       onPress={onPress}
       activeOpacity={0.7}
     >
+      {/* Sticker treatment: tinted well with the category color's own
+          border and hard offset shadow, like the landing's print look. */}
       <View
-        style={[styles.iconWell, { backgroundColor: withAlpha(color, 0.12) }]}
+        style={[
+          styles.iconWell,
+          {
+            backgroundColor: withAlpha(color, 0.12),
+            borderColor: withAlpha(color, 0.35),
+            boxShadow: hardShadow(withAlpha(color, 0.3), 3),
+          },
+        ]}
       >
         <Icon size={22} color={color} strokeWidth={1.8} />
       </View>
@@ -57,9 +67,10 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 17,
+    borderWidth: 1.5,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   name: {
     fontSize: 13,

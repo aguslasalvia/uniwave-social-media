@@ -6,7 +6,6 @@ import {
   Lock,
   LucideIcon,
   Users,
-  X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,8 +19,11 @@ import {
   View,
 } from "react-native";
 
+import { ModalHeader } from "@/components/ui/modals/ModalHeader";
+import { SectionLabel } from "@/components/ui/themed";
 import { ToastHost, useToast } from "@/components/ui/toast";
 import { withAlpha } from "@/constants/Colors";
+import { Radius } from "@/constants/Design";
 import { UserProfile } from "@/core/User";
 import { userService } from "@/services/userService";
 import { useColors } from "@/hooks/useColors";
@@ -169,25 +171,12 @@ export function CreatePostModal({
             app root can't show through it — mount a local one here. */}
         <ToastHost />
 
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity
-            onPress={handleClose}
-            style={styles.closeButton}
-            accessibilityLabel="Cerrar"
-          >
-            <X size={22} color={colors.text} strokeWidth={2} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Nueva publicación
-          </Text>
-          <TouchableOpacity
-            onPress={handleCreate}
-            style={[styles.publishButton, { backgroundColor: colors.tint }]}
-          >
-            <Text style={styles.publishButtonText}>Publicar</Text>
-          </TouchableOpacity>
-        </View>
+        <ModalHeader
+          title="Nueva publicación"
+          onClose={handleClose}
+          actionLabel="Publicar"
+          onAction={handleCreate}
+        />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* User */}
@@ -227,9 +216,7 @@ export function CreatePostModal({
           />
 
           {/* Image */}
-          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-            IMAGEN
-          </Text>
+          <SectionLabel style={styles.sectionLabel}>Imagen</SectionLabel>
           {pickedImage ? (
             <View style={styles.imagePreviewContainer}>
               <Image
@@ -265,9 +252,9 @@ export function CreatePostModal({
           )}
 
           {/* Privacy */}
-          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-            ¿QUIÉN PUEDE VERLO?
-          </Text>
+          <SectionLabel style={styles.sectionLabel}>
+            ¿Quién puede verlo?
+          </SectionLabel>
           <View style={styles.privacyOptions}>
             <PrivacyOption value="public" label="Público" icon={Globe} />
             <PrivacyOption value="friends" label="Amigos" icon={Users} />
@@ -282,31 +269,6 @@ export function CreatePostModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  closeButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  publishButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  publishButtonText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -336,7 +298,7 @@ const styles = StyleSheet.create({
   },
   contentInput: {
     borderWidth: 1.5,
-    borderRadius: 16,
+    borderRadius: Radius.card,
     padding: 16,
     minHeight: 140,
     fontSize: 15,
@@ -344,9 +306,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionLabel: {
-    fontSize: 11.5,
-    fontWeight: "700",
-    letterSpacing: 1.2,
     marginBottom: 10,
   },
   imagePickerButton: {
@@ -356,7 +315,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1.5,
     borderStyle: "dashed",
-    borderRadius: 14,
+    borderRadius: Radius.action,
     paddingVertical: 16,
     marginBottom: 24,
   },

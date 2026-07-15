@@ -1,5 +1,6 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
+import { Fonts } from "@/constants/Design";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedTextProps = TextProps & {
@@ -43,18 +44,22 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: "600",
   },
+  // Display types use the brand face; do not add fontWeight on top of a
+  // static font file (Android would fake-bold it).
   title: {
+    fontFamily: Fonts.displayHeavy,
     fontSize: 32,
-    fontWeight: "bold",
-    lineHeight: 32,
+    lineHeight: 36,
+    letterSpacing: -0.8,
   },
   subtitle: {
+    fontFamily: Fonts.display,
     fontSize: 20,
-    fontWeight: "bold",
+    letterSpacing: -0.3,
   },
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: "#0a7ea4",
+    fontWeight: "600",
   },
 });

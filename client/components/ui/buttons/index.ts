@@ -1,2 +1,2 @@
-export { SolidButton } from './SolidButton';
-export { SocialButton } from './SocialButton'; 
+export { GhostButton } from "./GhostButton";
+export { SolidButton } from "./SolidButton";

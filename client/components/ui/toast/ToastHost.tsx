@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius, hardShadow } from "@/constants/Design";
 
 import { ToastType, useToast } from "./ToastProvider";
 import { useColors } from "@/hooks/useColors";
@@ -115,7 +116,7 @@ export function ToastHost() {
             styles.card,
             {
               backgroundColor: fill,
-              boxShadow: `0px 10px 24px ${withAlpha(fill, 0.4)}`,
+              boxShadow: hardShadow(withAlpha(fill, 0.45)),
             },
           ]}
         >
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     minHeight: 60,
-    borderRadius: 18,
+    borderRadius: Radius.card,
     paddingVertical: 12,
     paddingHorizontal: 14,
     overflow: "hidden",
@@ -177,6 +178,6 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14.5,
     lineHeight: 19,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: Fonts.display,
   },
 });

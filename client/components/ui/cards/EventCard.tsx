@@ -8,6 +8,8 @@ import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/ui/themed";
+import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 interface EventCardProps {
@@ -40,7 +42,13 @@ export function EventCard({
 
   return (
     <TouchableOpacity
-      style={[styles.container, { borderColor: colors.border }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.surface,
+          borderColor: withAlpha(colors.tint, 0.18),
+        },
+      ]}
       onPress={onPress}
       activeOpacity={0.8}
     >
@@ -106,8 +114,8 @@ export function EventCard({
 const styles = StyleSheet.create({
   container: {
     width: 264,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.card,
+    borderWidth: 1,
     marginRight: 12,
     padding: 16,
   },
@@ -128,17 +136,17 @@ const styles = StyleSheet.create({
   },
   category: {
     flex: 1,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
+    fontFamily: Fonts.mono,
+    fontSize: 10.5,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
   bookmarkButton: {
     padding: 2,
   },
   title: {
+    fontFamily: Fonts.display,
     fontSize: 16,
-    fontWeight: "700",
     lineHeight: 21,
     marginBottom: 5,
   },

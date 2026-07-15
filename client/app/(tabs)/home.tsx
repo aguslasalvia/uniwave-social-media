@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Pressable,
   RefreshControl,
   StyleSheet,
   TouchableOpacity,
@@ -16,6 +17,7 @@ import {
 
 import { CreatePostModal, PostCard, ThemedText } from "@/components";
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, SHADOW_OFFSET, hardShadow } from "@/constants/Design";
 import { Post } from "@/core/Post";
 import { postService } from "@/services/postService";
 import { useColors } from "@/hooks/useColors";
@@ -221,6 +223,7 @@ export default function HomeScreen() {
               </View>
             )}
           </TouchableOpacity>
+          <ThemedText style={styles.wordmark}>UniWave</ThemedText>
           <TouchableOpacity
             style={styles.headerButton}
             accessibilityLabel="Notificaciones"
@@ -288,21 +291,25 @@ export default function HomeScreen() {
         />
 
         {/* Create post */}
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.fab,
             {
-              backgroundColor: colors.tint,
+              backgroundColor: colors.text,
+              boxShadow: hardShadow(colors.tint, pressed ? 0 : SHADOW_OFFSET),
+              transform: pressed
+                ? [{ translateX: SHADOW_OFFSET }, { translateY: SHADOW_OFFSET }]
+                : [],
               // Sit 14px above the nav bubble (dock bottom + bubble height).
               bottom: Math.max(insets.bottom, 16) + 16 + 56 + 14,
             },
           ]}
           onPress={() => setShowCreateModal(true)}
-          activeOpacity={0.85}
+          accessibilityRole="button"
           accessibilityLabel="Crear publicación"
         >
-          <Plus size={26} color="#ffffff" strokeWidth={2.4} />
-        </TouchableOpacity>
+          <Plus size={26} color={colors.background} strokeWidth={2.4} />
+        </Pressable>
 
         <CreatePostModal
           visible={showCreateModal}
@@ -349,6 +356,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  wordmark: {
+    fontFamily: Fonts.displayHeavy,
+    fontSize: 18,
+    letterSpacing: -0.4,
+  },
   postsList: {
     paddingHorizontal: 20,
     paddingBottom: 150,
@@ -373,8 +385,8 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   emptyStateTitle: {
+    fontFamily: Fonts.display,
     fontSize: 17,
-    fontWeight: "700",
     marginBottom: 6,
   },
   emptyStateSubtitle: {
@@ -390,7 +402,5 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    boxShadow: "0px 6px 16px rgba(15, 23, 42, 0.25)",
-    elevation: 8,
   },
 });

@@ -8,14 +8,12 @@ import {
   Mail,
   Phone,
   User,
-  X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -23,12 +21,13 @@ import {
 import { WaveMark } from "@/components/ui/brand";
 import { SolidButton } from "@/components/ui/buttons";
 import { DateInput, FormInput } from "@/components/ui/forms";
+import { ModalHeader } from "@/components/ui/modals/ModalHeader";
 import { ThemedText } from "@/components/ui/themed";
 import { ToastHost, useToast } from "@/components/ui/toast";
-import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius } from "@/constants/Design";
 import { initialRegisterForm, RegisterForm } from "@/core/User";
-import { universityService } from "@/services/universityServices";
 import { useColors } from "@/hooks/useColors";
+import { universityService } from "@/services/universityServices";
 
 interface RegisterModalProps {
   visible: boolean;
@@ -119,31 +118,13 @@ export function RegisterModal({
             app root can't show through it — mount a local one here. */}
         <ToastHost />
 
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity
-            onPress={handleClose}
-            style={styles.closeButton}
-            accessibilityLabel="Cerrar"
-          >
-            <X size={22} color={colors.text} strokeWidth={2} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Crear cuenta
-          </Text>
-          <TouchableOpacity
-            onPress={handleRegister}
-            style={[
-              styles.registerButton,
-              { backgroundColor: withAlpha(colors.tint, 0.12) },
-            ]}
-            disabled={isLoading}
-          >
-            <Text style={[styles.registerButtonText, { color: colors.tint }]}>
-              {isLoading ? "Registrando..." : "Registrar"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <ModalHeader
+          title=""
+          onClose={handleClose}
+          actionLabel={isLoading ? "Registrando..." : "Registrar"}
+          onAction={handleRegister}
+          actionDisabled={isLoading}
+        />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Brand */}
@@ -321,30 +302,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  closeButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  registerButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  registerButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
@@ -356,8 +313,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
+    fontFamily: Fonts.displayHeavy,
     fontSize: 24,
-    fontWeight: "800",
     letterSpacing: -0.6,
     marginTop: 12,
   },
@@ -377,7 +334,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     height: 54,
-    borderRadius: 14,
+    borderRadius: Radius.action,
     borderWidth: 1.5,
     paddingHorizontal: 16,
     gap: 8,

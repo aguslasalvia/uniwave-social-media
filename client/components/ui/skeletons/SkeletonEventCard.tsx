@@ -33,7 +33,11 @@ export function SkeletonEventCard() {
     <Animated.View
       style={[
         styles.container,
-        { borderColor: colors.border, opacity: fadeAnim },
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+          opacity: fadeAnim,
+        },
       ]}
     >
       <View style={styles.topRow}>
@@ -54,7 +58,7 @@ const styles = StyleSheet.create({
   container: {
     width: 264,
     borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     marginRight: 12,
     padding: 16,
   },

@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Radius } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
-
 
 interface DateInputProps {
   placeholder?: string;
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     height: 54,
-    borderRadius: 14,
+    borderRadius: Radius.action,
     borderWidth: 1.5,
     paddingHorizontal: 16,
     gap: 12,

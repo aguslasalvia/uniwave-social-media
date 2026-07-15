@@ -12,12 +12,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   FormInput,
+  Highlight,
   RegisterModal,
   SolidButton,
+  Stamp,
   ThemedText,
   WaveBackground,
   WaveMark,
 } from "@/components";
+import { Fonts } from "@/constants/Design";
 import { initialLoginForm, RegisterForm, UserLoginForm } from "@/core/User";
 import { useToast } from "@/components/ui/toast";
 import { authService } from "@/services/authService";
@@ -76,13 +79,16 @@ export default function LoginScreen() {
           >
             {/* Brand */}
             <View style={styles.header}>
-              <WaveMark size={76} color={colors.tint} />
-              <ThemedText style={styles.title}>
-                Uni
-                <ThemedText style={[styles.title, { color: colors.tint }]}>
+              <WaveMark size={72} color={colors.tint} />
+              <Stamp style={styles.stamp}>
+                Por estudiantes, para estudiantes
+              </Stamp>
+              <View style={styles.titleRow}>
+                <ThemedText style={styles.title}>Uni</ThemedText>
+                <Highlight textStyle={[styles.title, { color: colors.text }]}>
                   Wave
-                </ThemedText>
-              </ThemedText>
+                </Highlight>
+              </View>
               <ThemedText style={[styles.subtitle, { color: colors.textMuted }]}>
                 Conecta con tu comunidad universitaria
               </ThemedText>
@@ -161,14 +167,21 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 48,
+    marginBottom: 44,
+  },
+  stamp: {
+    marginTop: 20,
+  },
+  titleRow: {
+    flexDirection: "row",
+    marginTop: 14,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 36,
-    fontWeight: "800",
+    fontFamily: Fonts.displayHeavy,
+    fontSize: 38,
+    lineHeight: 44,
     letterSpacing: -1.2,
-    marginTop: 20,
-    marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,

@@ -27,11 +27,13 @@ import {
   CategoryCard,
   EventCard,
   SearchBar,
+  SectionLabel,
   SkeletonCard,
   SkeletonEventCard,
   ThemedText,
 } from "@/components";
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 // Mock data for categories
@@ -214,9 +216,7 @@ export default function ExploreScreen() {
     showSeeAll?: boolean;
   }) => (
     <View style={styles.sectionHeader}>
-      <ThemedText style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {label}
-      </ThemedText>
+      <SectionLabel>{label}</SectionLabel>
       {showSeeAll && (
         <TouchableOpacity>
           <ThemedText style={[styles.seeAllText, { color: colors.tint }]}>
@@ -281,7 +281,7 @@ export default function ExploreScreen() {
 
           {/* Categories */}
           <View style={styles.section}>
-            <SectionHeader label="CATEGORÍAS" />
+            <SectionHeader label="Categorías" />
             {isLoading ? (
               <FlatList
                 data={[1, 2, 3, 4, 5, 6]}
@@ -313,7 +313,7 @@ export default function ExploreScreen() {
 
           {/* Trending events */}
           <View style={styles.section}>
-            <SectionHeader label="EVENTOS DESTACADOS" showSeeAll />
+            <SectionHeader label="Eventos destacados" showSeeAll />
             {isLoading ? (
               <FlatList
                 data={[1, 2, 3, 4]}
@@ -349,7 +349,7 @@ export default function ExploreScreen() {
 
           {/* Study groups */}
           <View style={styles.section}>
-            <SectionHeader label="GRUPOS DE ESTUDIO" showSeeAll />
+            <SectionHeader label="Grupos de estudio" showSeeAll />
             {isLoading ? (
               <FlatList
                 data={[1, 2, 3, 4]}
@@ -366,7 +366,10 @@ export default function ExploreScreen() {
                   <TouchableOpacity
                     style={[
                       styles.studyGroupCard,
-                      { borderColor: colors.border },
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: withAlpha(colors.tint, 0.18),
+                      },
                     ]}
                     onPress={() => handleStudyGroupPress(item)}
                     activeOpacity={0.8}
@@ -478,8 +481,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
+    fontFamily: Fonts.displayHeavy,
     fontSize: 26,
-    fontWeight: "800",
     letterSpacing: -0.8,
   },
   headerSubtitle: {
@@ -515,11 +518,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     paddingHorizontal: 20,
   },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1.4,
-  },
   seeAllText: {
     fontSize: 13,
     fontWeight: "600",
@@ -529,9 +527,9 @@ const styles = StyleSheet.create({
   },
   studyGroupCard: {
     width: 240,
-    borderRadius: 16,
+    borderRadius: Radius.card,
     padding: 14,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     marginRight: 12,
   },
   studyGroupHeader: {

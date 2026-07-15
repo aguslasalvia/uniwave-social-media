@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { withAlpha } from "@/constants/Colors";
+import { hardShadow } from "@/constants/Design";
 import { useColors } from "@/hooks/useColors";
 
 const TAB_META: Record<string, { icon: LucideIcon; label: string }> = {
@@ -108,7 +109,8 @@ function BubbleTabBar({ state, navigation }: BottomTabBarProps) {
                     styles.optionBubble,
                     {
                       backgroundColor: colors.surface,
-                      borderColor: colors.border,
+                      borderColor: withAlpha(colors.tint, 0.25),
+                      boxShadow: hardShadow(withAlpha(colors.tint, 0.35), 3),
                     },
                   ]}
                 >
@@ -144,13 +146,16 @@ function BubbleTabBar({ state, navigation }: BottomTabBarProps) {
           accessibilityState={{ expanded: open }}
           style={[
             styles.mainBubble,
-            { backgroundColor: colors.surface, borderColor: colors.border },
+            {
+              backgroundColor: colors.text,
+              boxShadow: hardShadow(colors.tint, 3),
+            },
           ]}
         >
           {open ? (
-            <X size={24} color={colors.textMuted} strokeWidth={2.2} />
+            <X size={24} color={colors.background} strokeWidth={2.2} />
           ) : (
-            <ActiveIcon size={24} color={colors.tint} strokeWidth={2.3} />
+            <ActiveIcon size={24} color={colors.background} strokeWidth={2.3} />
           )}
         </TouchableOpacity>
       </View>
@@ -188,20 +193,15 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0px 6px 18px rgba(15, 23, 42, 0.14)",
-    elevation: 8,
   },
   mainBubble: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0px 8px 24px rgba(15, 23, 42, 0.18)",
-    elevation: 10,
   },
 });

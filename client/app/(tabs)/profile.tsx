@@ -6,6 +6,7 @@ import {
   Settings,
   Share2,
   Users,
+  Waves,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,8 +21,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { EditProfileModal } from "@/components";
+import {
+  EditProfileModal,
+  GhostButton,
+  SectionLabel,
+  Stamp,
+} from "@/components";
 import { withAlpha } from "@/constants/Colors";
+import { Fonts, Radius, hardShadow } from "@/constants/Design";
 import { authService } from "@/services/authService";
 import { userService } from "@/services/userService";
 import { useColors } from "@/hooks/useColors";
@@ -149,7 +156,7 @@ export default function ProfileScreen() {
             {/* Header */}
             <View style={styles.header}>
               <Text style={[styles.headerTitle, { color: colors.text }]}>
-                {userProfile ? `@${userProfile.username}` : "@usuario"}
+                Perfil
               </Text>
               <View style={styles.headerActions}>
                 <TouchableOpacity
@@ -177,84 +184,125 @@ export default function ProfileScreen() {
               style={styles.content}
               showsVerticalScrollIndicator={false}
             >
-              {/* Profile header */}
-              <View style={styles.profileHeader}>
-                {userProfile?.avatar ? (
-                  <Image
-                    source={{ uri: userProfile.avatar }}
-                    style={[styles.avatar, { borderColor: colors.border }]}
-                  />
-                ) : (
+              {/* Student-ID card: the landing's print language applied
+                  to the profile — surface card with tinted border, the
+                  signature hard shadow, a rotated university stamp and
+                  a faint wave watermark, like a campus credential. */}
+              <View
+                style={[
+                  styles.idCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: withAlpha(colors.tint, 0.25),
+                    boxShadow: hardShadow(withAlpha(colors.tint, 0.4)),
+                  },
+                ]}
+              >
+                <Waves
+                  size={120}
+                  color={colors.tint}
+                  strokeWidth={1.3}
+                  style={styles.idWatermark}
+                />
+
+                <SectionLabel style={styles.idLabel}>
+                  UniWave · Estudiante
+                </SectionLabel>
+
+                <View style={styles.idBody}>
                   <View
                     style={[
-                      styles.avatar,
-                      styles.avatarFallback,
+                      styles.avatarRing,
                       {
-                        backgroundColor: withAlpha(colors.tint, 0.14),
-                        borderColor: colors.border,
+                        borderColor: withAlpha(colors.tint, 0.5),
+                        backgroundColor: colors.background,
                       },
                     ]}
                   >
-                    <Text style={[styles.avatarInitial, { color: colors.tint }]}>
-                      {(userProfile?.fullName || "U").charAt(0).toUpperCase()}
+                    {userProfile?.avatar ? (
+                      <Image
+                        source={{ uri: userProfile.avatar }}
+                        style={styles.avatar}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.avatar,
+                          styles.avatarFallback,
+                          { backgroundColor: withAlpha(colors.tint, 0.14) },
+                        ]}
+                      >
+                        <Text
+                          style={[styles.avatarInitial, { color: colors.tint }]}
+                        >
+                          {(userProfile?.fullName || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.profileInfo}>
+                    <Text style={[styles.profileName, { color: colors.text }]}>
+                      {userProfile ? userProfile.fullName : "Cargando..."}
+                    </Text>
+                    <Text style={[styles.profileHandle, { color: colors.tint }]}>
+                      {userProfile ? `@${userProfile.username}` : "@usuario"}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.profileDetail,
+                        { color: colors.textMuted },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {userProfile ? userProfile.career : "Carrera"}
                     </Text>
                   </View>
-                )}
-
-                <View style={styles.profileInfo}>
-                  <Text style={[styles.profileName, { color: colors.text }]}>
-                    {userProfile ? userProfile.fullName : "Cargando..."}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.profileDetail,
-                      { color: colors.textMuted },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {userProfile ? userProfile.university : "Universidad"}
-                  </Text>
-                  <Text
-                    style={[styles.profileDetail, { color: colors.textMuted }]}
-                    numberOfLines={1}
-                  >
-                    {userProfile ? userProfile.career : "Carrera"}
-                  </Text>
                 </View>
-              </View>
 
-              {/* Stats */}
-              <View style={styles.statsRow}>
-                <Stat value={userStats.posts} label="posts" />
-                <Text style={[styles.statDot, { color: colors.textMuted }]}>
-                  ·
-                </Text>
-                <Stat value={userStats.followers} label="seguidores" />
-                <Text style={[styles.statDot, { color: colors.textMuted }]}>
-                  ·
-                </Text>
-                <Stat value={userStats.following} label="siguiendo" />
+                <Stamp style={styles.idStamp}>
+                  {userProfile ? userProfile.university : "Universidad"}
+                </Stamp>
+
+                <View
+                  style={[styles.idDivider, { backgroundColor: colors.border }]}
+                />
+
+                <View style={styles.statsRow}>
+                  <Stat value={userStats.posts} label="posts" />
+                  <Text style={[styles.statDot, { color: colors.textMuted }]}>
+                    ·
+                  </Text>
+                  <Stat value={userStats.followers} label="seguidores" />
+                  <Text style={[styles.statDot, { color: colors.textMuted }]}>
+                    ·
+                  </Text>
+                  <Stat value={userStats.following} label="siguiendo" />
+                </View>
               </View>
 
               {/* Actions */}
               <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  style={[styles.editButton, { borderColor: colors.border }]}
+                <GhostButton
+                  title="Editar perfil"
                   onPress={handleOpenEditModal}
-                >
-                  <Text style={[styles.editButtonText, { color: colors.text }]}>
-                    Editar perfil
-                  </Text>
-                </TouchableOpacity>
+                  style={styles.editButton}
+                />
                 <TouchableOpacity
-                  style={[styles.shareButton, { borderColor: colors.border }]}
+                  style={[
+                    styles.shareButton,
+                    { borderColor: withAlpha(colors.tint, 0.25) },
+                  ]}
                   accessibilityLabel="Compartir perfil"
                 >
                   <Share2 size={18} color={colors.text} strokeWidth={1.8} />
                 </TouchableOpacity>
               </View>
 
-              {/* Tabs */}
+              {/* Tabs — the active one gets the landing's highlighter
+                  swipe behind its label instead of an underline. */}
               <View
                 style={[styles.tabsRow, { borderBottomColor: colors.border }]}
               >
@@ -266,25 +314,26 @@ export default function ProfileScreen() {
                       style={styles.tab}
                       onPress={() => setActiveTab(key)}
                     >
-                      <Text
-                        style={[
-                          styles.tabLabel,
-                          {
-                            color: active ? colors.text : colors.textMuted,
-                            fontWeight: active ? "700" : "500",
-                          },
-                        ]}
-                      >
-                        {label}
-                      </Text>
-                      {active && (
-                        <View
+                      <View>
+                        {active && (
+                          <View
+                            style={[
+                              styles.tabSwipe,
+                              { backgroundColor: withAlpha(colors.tint, 0.35) },
+                            ]}
+                          />
+                        )}
+                        <Text
                           style={[
-                            styles.tabIndicator,
-                            { backgroundColor: colors.tint },
+                            styles.tabLabel,
+                            active
+                              ? { color: colors.text, fontFamily: Fonts.display }
+                              : { color: colors.textMuted, fontWeight: "500" },
                           ]}
-                        />
-                      )}
+                        >
+                          {label}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -364,9 +413,9 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    letterSpacing: -0.5,
+    fontFamily: Fonts.displayHeavy,
+    fontSize: 26,
+    letterSpacing: -0.8,
   },
   headerActions: {
     flexDirection: "row",
@@ -381,18 +430,48 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  profileHeader: {
+  idCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 18,
+    borderWidth: 1.5,
+    borderRadius: Radius.card,
+    overflow: "hidden",
+  },
+  idWatermark: {
+    position: "absolute",
+    right: -16,
+    bottom: -22,
+    opacity: 0.08,
+    transform: [{ rotate: "-8deg" }],
+  },
+  idLabel: {
+    fontSize: 10,
+    marginBottom: 14,
+  },
+  idBody: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    marginBottom: 14,
+  },
+  idStamp: {
+    alignSelf: "flex-start",
     marginBottom: 16,
   },
+  idDivider: {
+    height: StyleSheet.hairlineWidth,
+    marginBottom: 12,
+  },
+  avatarRing: {
+    borderWidth: 2,
+    borderRadius: 42,
+    padding: 2,
+    marginRight: 14,
+  },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginRight: 16,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
   },
   avatarFallback: {
     justifyContent: "center",
@@ -404,12 +483,18 @@ const styles = StyleSheet.create({
   },
   profileInfo: {
     flex: 1,
-    gap: 2,
+    gap: 3,
   },
   profileName: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontFamily: Fonts.displayHeavy,
+    fontSize: 21,
     letterSpacing: -0.4,
+  },
+  // The @handle reads as a code identifier, so it gets the mono face
+  // (like emails and labels on the landing page).
+  profileHandle: {
+    fontFamily: Fonts.mono,
+    fontSize: 12.5,
   },
   profileDetail: {
     fontSize: 13.5,
@@ -418,15 +503,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 20,
-    marginBottom: 18,
   },
   statText: {
     fontSize: 13.5,
   },
   statNumber: {
-    fontSize: 13.5,
-    fontWeight: "800",
+    fontFamily: Fonts.display,
+    fontSize: 14,
   },
   statDot: {
     fontSize: 13.5,
@@ -439,21 +522,13 @@ const styles = StyleSheet.create({
   },
   editButton: {
     flex: 1,
-    height: 42,
-    borderWidth: 1,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  editButtonText: {
-    fontSize: 14.5,
-    fontWeight: "600",
+    height: 44,
   },
   shareButton: {
-    width: 42,
-    height: 42,
-    borderWidth: 1,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderWidth: 1.5,
+    borderRadius: Radius.action,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -470,12 +545,16 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 13.5,
   },
-  tabIndicator: {
+  // Marker swipe across the lower half of the active tab label,
+  // mirroring the landing's .mark highlight.
+  tabSwipe: {
     position: "absolute",
-    bottom: 0,
-    height: 2,
-    width: 48,
-    borderRadius: 1,
+    left: -5,
+    right: -6,
+    top: "45%",
+    bottom: -1,
+    borderRadius: 3,
+    transform: [{ skewX: "-10deg" }, { rotate: "-0.8deg" }],
   },
   postsGrid: {
     paddingHorizontal: 20,
@@ -523,8 +602,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyStateTitle: {
+    fontFamily: Fonts.display,
     fontSize: 16,
-    fontWeight: "700",
     marginTop: 8,
   },
   emptyStateSubtitle: {

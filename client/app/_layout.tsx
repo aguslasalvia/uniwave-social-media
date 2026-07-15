@@ -1,7 +1,8 @@
 import {
-  SpaceGrotesk_600SemiBold,
-  SpaceGrotesk_700Bold,
-} from "@expo-google-fonts/space-grotesk";
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from "@expo-google-fonts/bricolage-grotesque";
+import { IBMPlexMono_600SemiBold } from "@expo-google-fonts/ibm-plex-mono";
 import {
   DarkTheme,
   DefaultTheme,
@@ -40,9 +41,9 @@ export default function RootLayout() {
     };
   }, [colorScheme, colors]);
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    IBMPlexMono_600SemiBold,
   });
 
   const { isAuthenticated, loading } = useAuth();
